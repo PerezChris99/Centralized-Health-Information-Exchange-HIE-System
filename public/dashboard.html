@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Dashboard</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const socket = io();
+
+      socket.on('patientCreated', (patient) => {
+        // Update the patient table with the new patient data
+      });
+
+      socket.on('patientUpdated', (patient) => {
+        // Update the patient table with the updated patient data
+      });
+
+      // Function to add a new patient
+      const addPatientForm = document.getElementById('addPatientForm');
+      addPatientForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(addPatientForm);
+        const patientData = Object.fromEntries(formData.entries());
+
+        fetch('/api/patients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patientData),
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the response data
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Patient Dashboard</h1>
+  <table id="patientTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Contact Info</th>
+        <th>Medical History</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Patient data will be populated here -->
+    </tbody>
+  </table>
+  <form id="addPatientForm">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="number" name="age" placeholder="Age" required>
+    <input type="text" name="gender" placeholder="Gender" required>
+    <input type="text" name="contactInfo" placeholder="Contact Info">
+    <input type="text" name="medicalHistory" placeholder="Medical History">
+    <button type="submit">Add Patient</button>
+  </form>
+</body>
+</html>
