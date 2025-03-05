@@ -68,14 +68,12 @@ The application uses Socket.IO to provide real-time notifications when a patient
 ## Dashboard
 The dashboard is a simple HTML page that displays real-time updates of patient data. It includes a table listing current patients and a form to add new patients.
 
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any changes.
 
 ## Contact
-For any questions or inquiries, please contact [your-email@example.com].
+For any questions or inquiries, please contact kweeziperez712@gmail.com.
 
 ## Legal Notice
 © Kweezi Perez Christopher. All rights reserved. Unauthorized use of this project without express permission from the owner is strictly prohibited and will result in legal action.
