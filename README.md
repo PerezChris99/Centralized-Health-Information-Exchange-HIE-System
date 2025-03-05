@@ -68,6 +68,8 @@ The application uses Socket.IO to provide real-time notifications when a patient
 ## Dashboard
 The dashboard is a simple HTML page that displays real-time updates of patient data. It includes a table listing current patients and a form to add new patients.
 
+## Heart Rate Monitor
+![Heart Rate Monitor](https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif)
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any changes.
