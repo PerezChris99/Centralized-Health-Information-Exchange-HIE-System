@@ -7,6 +7,8 @@ const http = require('http');
 const connectDB = require('./config/db');
 const patientRoutes = require('./routes/patientRoutes');
 const { initNotificationService } = require('./services/notificationService');
+const auth = require('./middleware/auth');
+const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
 
@@ -19,9 +21,11 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-app.use('/api', patientRoutes);
+app.use('/api', auth, patientRoutes);
 
 initNotificationService(server);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
