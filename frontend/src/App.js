@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
 import './App.css';
@@ -169,16 +169,15 @@ const App = () => {
           <Link to="/register">Register</Link>
           <Link to="/login">Login</Link>
         </nav>
-        <Switch>
-          <Route path="/register">
-            <Register />
-          </Route>
-          <Route path="/login">
-            <Login setToken={setToken} />
-          </Route>
-          <Route path="/">
-            {!token ? (
-              <p>Please login to access the dashboard.</p>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login setToken={setToken} />} />
+          <Route path="/" element={
+            !token ? (
+              <div>
+                <p>Please login to access the dashboard.</p>
+                <Link to="/login">Login</Link>
+              </div>
             ) : (
               <>
                 <h1>Patient Dashboard</h1>
@@ -265,9 +264,9 @@ const App = () => {
                   </>
                 )}
               </>
-            )}
-          </Route>
-        </Switch>
+            )
+          } />
+        </Routes>
       </div>
     </Router>
   );
