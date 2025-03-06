@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
 import './App.css';
+import Register from './Register';
+import Login from './Login';
 
 const socket = io('http://localhost:3000'); // Adjust the URL as needed
 
@@ -159,113 +162,114 @@ const App = () => {
   );
 
   return (
-    <div>
-      {!token ? (
-        <form onSubmit={handleLogin}>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit">Login</button>
-        </form>
-      ) : (
-        <>
-          <h1>Patient Dashboard</h1>
-          <input
-            type="text"
-            placeholder="Search patients..."
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ marginBottom: '20px', padding: '10px', width: '100%', maxWidth: '400px' }}
-          />
-          <form onSubmit={handleSubmit}>
-            <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleInputChange} required />
-            <input type="number" name="age" placeholder="Age" value={formData.age} onChange={handleInputChange} required />
-            <input type="text" name="gender" placeholder="Gender" value={formData.gender} onChange={handleInputChange} required />
-            <input type="text" name="contactInfo" placeholder="Contact Info" value={formData.contactInfo} onChange={handleInputChange} />
-            <input type="text" name="medicalHistory" placeholder="Medical History" value={formData.medicalHistory} onChange={handleInputChange} />
-            <button type="submit">{editMode ? 'Update Patient' : 'Add Patient'}</button>
-          </form>
-          <h2>Appointments</h2>
-          <form onSubmit={handleAppointmentSubmit}>
-            <select name="patient" value={appointmentData.patient} onChange={handleAppointmentChange} required>
-              <option value="">Select Patient</option>
-              {patients.map((patient) => (
-                <option key={patient._id} value={patient._id}>{patient.name}</option>
-              ))}
-            </select>
-            <input type="text" name="doctor" placeholder="Doctor" value={appointmentData.doctor} onChange={handleAppointmentChange} required />
-            <input type="datetime-local" name="date" value={appointmentData.date} onChange={handleAppointmentChange} required />
-            <input type="text" name="reason" placeholder="Reason" value={appointmentData.reason} onChange={handleAppointmentChange} required />
-            <button type="submit">Add Appointment</button>
-          </form>
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>Contact Info</th>
-                    <th>Medical History</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPatients.map((patient) => (
-                    <tr key={patient._id}>
-                      <td>{patient.name}</td>
-                      <td>{patient.age}</td>
-                      <td>{patient.gender}</td>
-                      <td>{patient.contactInfo}</td>
-                      <td>{patient.medicalHistory.join(', ')}</td>
-                      <td>
-                        <button onClick={() => handleEdit(patient)}>Edit</button>
-                        <button onClick={() => handleDelete(patient._id)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <h2>Appointment List</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Patient</th>
-                    <th>Doctor</th>
-                    <th>Date</th>
-                    <th>Reason</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((appointment) => (
-                    <tr key={appointment._id}>
-                      <td>{appointment.patient.name}</td>
-                      <td>{appointment.doctor.username}</td>
-                      <td>{new Date(appointment.date).toLocaleString()}</td>
-                      <td>{appointment.reason}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-        </>
-      )}
-    </div>
+    <Router>
+      <div>
+        <nav>
+          <Link to="/">Home</Link>
+          <Link to="/register">Register</Link>
+          <Link to="/login">Login</Link>
+        </nav>
+        <Switch>
+          <Route path="/register">
+            <Register />
+          </Route>
+          <Route path="/login">
+            <Login setToken={setToken} />
+          </Route>
+          <Route path="/">
+            {!token ? (
+              <p>Please login to access the dashboard.</p>
+            ) : (
+              <>
+                <h1>Patient Dashboard</h1>
+                <input
+                  type="text"
+                  placeholder="Search patients..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  style={{ marginBottom: '20px', padding: '10px', width: '100%', maxWidth: '400px' }}
+                />
+                <form onSubmit={handleSubmit}>
+                  <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleInputChange} required />
+                  <input type="number" name="age" placeholder="Age" value={formData.age} onChange={handleInputChange} required />
+                  <input type="text" name="gender" placeholder="Gender" value={formData.gender} onChange={handleInputChange} required />
+                  <input type="text" name="contactInfo" placeholder="Contact Info" value={formData.contactInfo} onChange={handleInputChange} />
+                  <input type="text" name="medicalHistory" placeholder="Medical History" value={formData.medicalHistory} onChange={handleInputChange} />
+                  <button type="submit">{editMode ? 'Update Patient' : 'Add Patient'}</button>
+                </form>
+                <h2>Appointments</h2>
+                <form onSubmit={handleAppointmentSubmit}>
+                  <select name="patient" value={appointmentData.patient} onChange={handleAppointmentChange} required>
+                    <option value="">Select Patient</option>
+                    {patients.map((patient) => (
+                      <option key={patient._id} value={patient._id}>{patient.name}</option>
+                    ))}
+                  </select>
+                  <input type="text" name="doctor" placeholder="Doctor" value={appointmentData.doctor} onChange={handleAppointmentChange} required />
+                  <input type="datetime-local" name="date" value={appointmentData.date} onChange={handleAppointmentChange} required />
+                  <input type="text" name="reason" placeholder="Reason" value={appointmentData.reason} onChange={handleAppointmentChange} required />
+                  <button type="submit">Add Appointment</button>
+                </form>
+                {loading ? (
+                  <p>Loading...</p>
+                ) : (
+                  <>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Age</th>
+                          <th>Gender</th>
+                          <th>Contact Info</th>
+                          <th>Medical History</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredPatients.map((patient) => (
+                          <tr key={patient._id}>
+                            <td>{patient.name}</td>
+                            <td>{patient.age}</td>
+                            <td>{patient.gender}</td>
+                            <td>{patient.contactInfo}</td>
+                            <td>{patient.medicalHistory.join(', ')}</td>
+                            <td>
+                              <button onClick={() => handleEdit(patient)}>Edit</button>
+                              <button onClick={() => handleDelete(patient._id)}>Delete</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <h2>Appointment List</h2>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Patient</th>
+                          <th>Doctor</th>
+                          <th>Date</th>
+                          <th>Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {appointments.map((appointment) => (
+                          <tr key={appointment._id}>
+                            <td>{appointment.patient.name}</td>
+                            <td>{appointment.doctor.username}</td>
+                            <td>{new Date(appointment.date).toLocaleString()}</td>
+                            <td>{appointment.reason}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+              </>
+            )}
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
 };
 

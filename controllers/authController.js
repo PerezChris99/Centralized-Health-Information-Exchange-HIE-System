@@ -25,3 +25,20 @@ exports.login = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Predefined admin login
+exports.adminLogin = async (req, res) => {
+  const { username, password } = req.body;
+  const predefinedAdmins = [
+    { username: 'admin1', password: 'adminpassword1' },
+    { username: 'admin2', password: 'adminpassword2' },
+  ];
+
+  const admin = predefinedAdmins.find(admin => admin.username === username && admin.password === password);
+  if (!admin) {
+    return res.status(401).json({ error: 'Invalid admin credentials' });
+  }
+
+  const token = jwt.sign({ username: admin.username, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  res.status(200).json({ token });
+};
