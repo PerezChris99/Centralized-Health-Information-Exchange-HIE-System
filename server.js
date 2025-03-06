@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 const http = require('http');
 const connectDB = require('./config/db');
 const patientRoutes = require('./routes/patientRoutes');
+const authRoutes = require('./routes/authRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
 const { initNotificationService } = require('./services/notificationService');
 const auth = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
@@ -21,7 +23,9 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-app.use('/api', auth, patientRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/patients', auth, patientRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 initNotificationService(server);
 
