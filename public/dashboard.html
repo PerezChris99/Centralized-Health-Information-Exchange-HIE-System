@@ -3,33 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Patient Dashboard</title>
-  <script src="/socket.io/socket.io.js"></script>
+  <title>Health Information Exchange Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 20px; }
+    .patient-card { margin-bottom: 15px; }
+    #notification-area {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 300px;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
-  <h1>Patient Dashboard</h1>
-  <table id="patientTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Age</th>
-        <th>Gender</th>
-        <th>Contact Info</th>
-        <th>Medical History</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Patient data will be populated here -->
-    </tbody>
-  </table>
-  <form id="addPatientForm">
-    <input type="text" name="name" placeholder="Name" required>
-    <input type="number" name="age" placeholder="Age" required>
-    <input type="text" name="gender" placeholder="Gender" required>
-    <input type="text" name="contactInfo" placeholder="Contact Info">
-    <input type="text" name="medicalHistory" placeholder="Medical History">
-    <button type="submit">Add Patient</button>
-  </form>
+  <div class="container">
+    <h1 class="text-center mb-4">Health Information Exchange System</h1>
+    
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title">Patient List</h5>
+          </div>
+          <div class="card-body">
+            <div id="patientList" class="row"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title">Add New Patient</h5>
+          </div>
+          <div class="card-body">
+            <form id="addPatientForm">
+              <div class="mb-3">
+                <label for="patientName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="patientName" required>
+              </div>
+              <div class="mb-3">
+                <label for="patientAge" class="form-label">Age</label>
+                <input type="number" class="form-control" id="patientAge" required>
+              </div>
+              <div class="mb-3">
+                <label for="patientGender" class="form-label">Gender</label>
+                <select class="form-control" id="patientGender" required>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="patientContact" class="form-label">Contact Info</label>
+                <input type="text" class="form-control" id="patientContact" required>
+              </div>
+              <div class="mb-3">
+                <label for="patientHistory" class="form-label">Medical History</label>
+                <textarea class="form-control" id="patientHistory" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Add Patient</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification-area"></div>
+
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <script src="scripts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script src="script.js"></script>
 </html>

@@ -16,6 +16,10 @@ app.delete('/patients/:id', patientController.deletePatientById);
 describe('Patient Controller', () => {
   beforeAll(async () => {
     const url = `mongodb://127.0.0.1/patient_test_db`;
+    // Close any existing connections before creating a new one for tests
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.connection.close();
+    }
     await mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
   });
 

@@ -1,34 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = io();
-
-    socket.on('patientCreated', (patient) => {
-        // Update the patient table with the new patient data
+  const socket = io();
+  const patientTable = document.getElementById('patientTable').getElementsByTagName('tbody')[0];
+  const addPatientForm = document.getElementById('addPatientForm');
+  
+  // Handle initial patient data
+  socket.on('initialPatients', (patients) => {
+    patients.forEach(patient => {
+      addPatientToTable(patient);
     });
-
-    socket.on('patientUpdated', (patient) => {
-        // Update the patient table with the updated patient data
-    });
-
-    // Function to add a new patient
-    const addPatientForm = document.getElementById('addPatientForm');
-    addPatientForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const formData = new FormData(addPatientForm);
-        const patientData = Object.fromEntries(formData.entries());
-
-        fetch('/api/patients', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(patientData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the response data
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
+  });
+  
+  // Handle newly added patients
+  socket.on('patientAdded', (patient) => {
+    addPatientToTable(patient);
+  });
+  
+  // Handle form submission
+  addPatientForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const patient = {
+      name: e.target.name.value,
+      age: parseInt(e.target.age.value),
+      gender: e.target.gender.value,
+      contactInfo: e.target.contactInfo.value,
+      medicalHistory: e.target.medicalHistory.value
+    };
+    
+    socket.emit('addPatient', patient);
+    addPatientForm.reset();
+  });
+  
+  // Function to add a patient to the table
+  function addPatientToTable(patient) {
+    const row = document.createElement('tr');
+    
+    row.innerHTML = `
+      <td>${patient.name}</td>
+      <td>${patient.age}</td>
+      <td>${patient.gender}</td>
+      <td>${patient.contactInfo}</td>
+      <td>${patient.medicalHistory}</td>
+    `;
+    
+    patientTable.appendChild(row);
+  }
 });
