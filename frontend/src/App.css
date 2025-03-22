@@ -95,3 +95,54 @@ td {
     font-weight: bold;
   }
 }
+
+.app {
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.nav-links li {
+  margin-left: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+}
+
+.home {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.home h1 {
+  color: #333;
+}
+
+.home p {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: #666;
+}

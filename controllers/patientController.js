@@ -54,3 +54,7 @@ exports.deletePatientById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getSomething = (req, res) => {
+  res.status(200).json({ message: 'This endpoint is working properly' });
+};

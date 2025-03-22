@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Information Exchange API Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; text-align: center; }
+        .endpoint { background-color: #f4f4f4; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .method { font-weight: bold; background-color: #e7f3fe; padding: 5px; border-radius: 3px; }
+        .get { color: #4CAF50; }
+        .post { color: #2196F3; }
+        .put { color: #FF9800; }
+        .delete { color: #F44336; }
+        pre { background-color: #f8f8f8; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .section { margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Health Information Exchange API Documentation</h1>
+    
+    <div class="section">
+        <h2>Authentication</h2>
+        
+        <div class="endpoint">
+            <h3><span class="method post">POST</span> /api/auth/register</h3>
+            <p>Register a new user</p>
+            <h4>Request Body:</h4>
+            <pre>{
+  "username": "doctor1",
+  "password": "password123",
+  "role": "doctor"
+}</pre>
+            <h4>Response:</h4>
+            <pre>{
+  "token": "jwt_token_here"
+}</pre>
+        </div>
+        
+        <div class="endpoint">
+            <h3><span class="method post">POST</span> /api/auth/login</h3>
+            <p>Login a user</p>
+            <h4>Request Body:</h4>
+            <pre>{
+  "username": "doctor1",
+  "password": "password123"
+}</pre>
+            <h4>Response:</h4>
+            <pre>{
+  "token": "jwt_token_here"
+}</pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Patients</h2>
+        
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> /api/patients</h3>
+            <p>Get all patients</p>
+            <h4>Headers:</h4>
+            <pre>Authorization: Bearer jwt_token_here</pre>
+            <h4>Response:</h4>
+            <pre>[
+  {
+    "_id": "60f1b5b5e6c8a32a4c9b3f1c",
+    "name": "John Doe",
+    "age": 45,
+    "gender": "male",
+    "contactInfo": "john.doe@example.com",
+    "medicalHistory": ["Hypertension", "Diabetes"]
+  }
+]</pre>
+        </div>
+        
+        <div class="endpoint">
+            <h3><span class="method post">POST</span> /api/patients</h3>
+            <p>Create a new patient</p>
+            <h4>Headers:</h4>
+            <pre>Authorization: Bearer jwt_token_here</pre>
+            <h4>Request Body:</h4>
+            <pre>{
+  "name": "Jane Smith",
+  "age": 35,
+  "gender": "female",
+  "contactInfo": "jane.smith@example.com",
+  "medicalHistory": ["Asthma"]
+}</pre>
+            <h4>Response:</h4>
+            <pre>{
+  "_id": "60f1b5b5e6c8a32a4c9b3f1d",
+  "name": "Jane Smith",
+  "age": 35,
+  "gender": "female",
+  "contactInfo": "jane.smith@example.com",
+  "medicalHistory": ["Asthma"]
+}</pre>
+        </div>
+
+        <!-- More endpoints -->
+    </div>
+
+    <div class="section">
+        <h2>Medical Records</h2>
+        
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> /api/medical-records/patient/:patientId</h3>
+            <p>Get all medical records for a patient</p>
+            <h4>Headers:</h4>
+            <pre>Authorization: Bearer jwt_token_here</pre>
+            <h4>Response:</h4>
+            <pre>{
+  "success": true,
+  "count": 1,
+  "data": [
+    {
+      "_id": "60f1b5b5e6c8a32a4c9b3f1e",
+      "patient": {
+        "_id": "60f1b5b5e6c8a32a4c9b3f1c",
+        "name": "John Doe"
+      },
+      "provider": {
+        "_id": "60f1b5b5e6c8a32a4c9b3f1b",
+        "username": "doctor1"
+      },
+      "visitDate": "2023-07-15T10:30:00.000Z",
+      "diagnosis": [
+        {
+          "code": "I10",
+          "description": "Essential hypertension"
+        }
+      ],
+      "medications": [
+        {
+          "name": "Lisinopril",
+          "dosage": "10mg",
+          "frequency": "Once daily"
+        }
+      ]
+    }
+  ]
+}</pre>
+        </div>
+        
+        <!-- More endpoints -->
+    </div>
+</body>
+</html>

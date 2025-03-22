@@ -1,91 +1,51 @@
 const express = require('express');
 const router = express.Router();
+const appointmentController = require('../controllers/appointmentController');
+const auth = require('../middleware/auth');
+const roleAuth = require('../middleware/roleAuth');
+const auditLogger = require('../middleware/auditLogger');
 
-// Placeholder for Appointment data - replace with MongoDB model
-let appointments = [
-  { 
-    id: 1, 
-    patientId: 1, 
-    doctorId: 1, 
-    date: "2023-12-15T10:00:00Z", 
-    status: "scheduled", 
-    notes: "Regular checkup" 
-  },
-  { 
-    id: 2, 
-    patientId: 2, 
-    doctorId: 2, 
-    date: "2023-12-16T14:30:00Z", 
-    status: "scheduled", 
-    notes: "Follow-up appointment" 
-  }
-];
+// All routes require authentication
+router.use(auth);
 
-// @route   GET api/appointments
-// @desc    Get all appointments
-// @access  Private
-router.get('/', (req, res) => {
-  res.json(appointments);
-});
+// Get all appointments - accessible by all authenticated users with filtering
+router.get('/', 
+  auditLogger('read', 'appointment'),
+  appointmentController.getAllAppointments
+);
 
-// @route   GET api/appointments/:id
-// @desc    Get appointment by ID
-// @access  Private
-router.get('/:id', (req, res) => {
-  const appointment = appointments.find(a => a.id === parseInt(req.params.id));
-  
-  if (!appointment) {
-    return res.status(404).json({ message: 'Appointment not found' });
-  }
-  
-  res.json(appointment);
-});
+// Get appointment by ID - accessible by all authenticated users
+router.get('/:id', 
+  auditLogger('read', 'appointment'),
+  appointmentController.getAppointmentById
+);
 
-// @route   POST api/appointments
-// @desc    Create an appointment
-// @access  Private
-router.post('/', (req, res) => {
-  const newAppointment = {
-    id: appointments.length + 1,
-    ...req.body
-  };
-  
-  appointments.push(newAppointment);
-  res.status(201).json(newAppointment);
-});
+// Create new appointment - accessible by admin, doctor, nurse, staff
+router.post('/', 
+  roleAuth('admin', 'doctor', 'nurse', 'staff'),
+  auditLogger('create', 'appointment'),
+  appointmentController.createAppointment
+);
 
-// @route   PUT api/appointments/:id
-// @desc    Update appointment
-// @access  Private
-router.put('/:id', (req, res) => {
-  const appointmentIndex = appointments.findIndex(a => a.id === parseInt(req.params.id));
-  
-  if (appointmentIndex === -1) {
-    return res.status(404).json({ message: 'Appointment not found' });
-  }
-  
-  appointments[appointmentIndex] = {
-    ...appointments[appointmentIndex],
-    ...req.body
-  };
-  
-  res.json(appointments[appointmentIndex]);
-});
+// Update appointment - accessible by admin, doctor, nurse, staff
+router.put('/:id', 
+  roleAuth('admin', 'doctor', 'nurse', 'staff'),
+  auditLogger('update', 'appointment'),
+  appointmentController.updateAppointment
+);
 
-// @route   DELETE api/appointments/:id
-// @desc    Delete appointment
-// @access  Private
-router.delete('/:id', (req, res) => {
-  const appointmentIndex = appointments.findIndex(a => a.id === parseInt(req.params.id));
-  
-  if (appointmentIndex === -1) {
-    return res.status(404).json({ message: 'Appointment not found' });
-  }
-  
-  const deletedAppointment = appointments[appointmentIndex];
-  appointments = appointments.filter(a => a.id !== parseInt(req.params.id));
-  
-  res.json({ message: 'Appointment removed', deletedAppointment });
-});
+// Cancel appointment - accessible by admin, doctor, nurse, staff
+router.put('/:id/cancel', 
+  roleAuth('admin', 'doctor', 'nurse', 'staff'),
+  auditLogger('update', 'appointment'),
+  appointmentController.cancelAppointment
+);
+
+// Get provider schedule - accessible by admin, doctor, nurse
+router.get('/provider/:providerId?', 
+  roleAuth('admin', 'doctor', 'nurse'),
+  auditLogger('read', 'appointment'),
+  appointmentController.getProviderSchedule
+);
 
 module.exports = router;
