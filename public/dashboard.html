@@ -8,84 +8,90 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
+<body class="bg-light">
     <nav class="navbar navbar-medical navbar-expand-lg">
-        <div class="container">
+        <div class="container-fluid px-3">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-hospital me-2"></i>
-                Health Information Exchange
+                <i class="fas fa-hospital"></i>
+                HIE System
             </a>
             <div class="d-flex align-items-center">
-                <span class="me-3 text-muted">
-                    <i class="fas fa-user-md me-1"></i>
+                <span class="me-2 text-muted">
+                    <i class="fas fa-user-md"></i>
                     Dr. John Doe
                 </span>
-                <button id="logoutBtn" class="btn btn-outline-danger">
-                    <i class="fas fa-sign-out-alt me-1"></i>
+                <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </button>
             </div>
         </div>
     </nav>
 
-    <div class="container py-4">
-        <div class="row g-4">
+    <div class="dashboard-container">
+        <div class="row h-100 g-2">
             <div class="col-md-4">
-                <div class="medical-container">
-                    <h4 class="mb-4">
-                        <i class="fas fa-user-plus text-primary me-2"></i>
-                        Add New Patient
-                    </h4>
-                    <form id="addPatientForm">
-                        <div class="mb-3">
-                            <label for="patientName" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="patientName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patientAge" class="form-label">Age</label>
-                            <input type="number" class="form-control" id="patientAge" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patientGender" class="form-label">Gender</label>
-                            <select class="form-control" id="patientGender" required>
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patientContact" class="form-label">Contact Info</label>
-                            <input type="text" class="form-control" id="patientContact" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patientHistory" class="form-label">Medical History</label>
-                            <textarea class="form-control" id="patientHistory" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-medical w-100">
-                            <i class="fas fa-plus-circle me-2"></i>
-                            Add Patient
-                        </button>
-                    </form>
+                <div class="dashboard-panel">
+                    <div class="panel-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-user-plus text-primary me-2"></i>
+                            Add New Patient
+                        </h6>
+                    </div>
+                    <div class="panel-body">
+                        <form id="addPatientForm" class="form-panel">
+                            <div class="form-group">
+                                <label class="form-label small">Name</label>
+                                <input type="text" class="form-control" id="patientName" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label small">Age</label>
+                                <input type="number" class="form-control" id="patientAge" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label small">Gender</label>
+                                <select class="form-control" id="patientGender" required>
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label small">Contact</label>
+                                <input type="text" class="form-control" id="patientContact" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label small">Medical History</label>
+                                <textarea class="form-control" id="patientHistory"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-medical btn-sm w-100">
+                                <i class="fas fa-plus-circle me-1"></i>
+                                Add Patient
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             
             <div class="col-md-8">
-                <div class="medical-container">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4>
+                <div class="dashboard-panel">
+                    <div class="panel-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
                             <i class="fas fa-users text-primary me-2"></i>
                             Patient Records
-                        </h4>
-                        <div class="input-group" style="width: 300px;">
+                        </h6>
+                        <div class="input-group input-group-sm" style="width: 200px;">
                             <span class="input-group-text">
                                 <i class="fas fa-search"></i>
                             </span>
-                            <input type="text" class="form-control" placeholder="Search patients...">
+                            <input type="text" class="form-control" placeholder="Search...">
                         </div>
                     </div>
-                    <div class="row" id="patientList">
-                        <!-- Patient cards will be added here dynamically -->
+                    <div class="panel-body">
+                        <div class="patient-list" id="patientList">
+                            <!-- Patient cards will be added here dynamically -->
+                        </div>
                     </div>
                 </div>
             </div>
