@@ -1,15 +1,22 @@
 /* Custom styles for Health Information Exchange System */
 
 :root {
-  --primary-color: #0d6efd;
-  --secondary-color: #6c757d;
-  --success-color: #198754;
-  --danger-color: #dc3545;
-  --light-color: #f8f9fa;
-  --dark-color: #212529;
+  --primary-color: #2c7a7b;
+  --secondary-color: #4a5568;
+  --accent-color: #38b2ac;
+  --background-color: #f7fafc;
+  --light-accent: #e6fffa;
+  --error-color: #e53e3e;
+  --success-color: #38a169;
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --border-color: #e2e8f0;
 }
 
 body {
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding-top: 20px;
   min-height: 100vh;
   display: flex;
@@ -18,6 +25,14 @@ body {
 
 .content-wrapper {
   flex: 1;
+}
+
+.medical-container {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(247,250,252,0.9) 100%);
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  margin: 2rem auto;
 }
 
 /* Dashboard */
@@ -41,6 +56,25 @@ body {
 .status-card .count {
   font-size: 2rem;
   font-weight: bold;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+}
+
+.stats-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--light-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
 }
 
 /* Table styles */
@@ -76,6 +110,20 @@ body {
   border-radius: 0 5px 5px 0;
 }
 
+.patient-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.patient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
 /* Authentication forms */
 .auth-form {
   max-width: 400px;
@@ -85,14 +133,75 @@ body {
   border-radius: 0.5rem;
 }
 
-/* Animations */
-.fade-in {
-  animation: fadeIn 0.5s ease-in;
+.auth-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+
+.medical-icon {
+  color: var(--primary-color);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-control {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+}
+
+.btn-medical {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-medical:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+/* Animations */
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Medical themed form elements */
+.medical-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.medical-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 /* Responsive adjustments */
@@ -130,4 +239,14 @@ body {
     max-width: 100% !important;
     width: 100% !important;
   }
+}
+
+.navbar-medical {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.navbar-brand {
+  color: var(--primary-color);
+  font-weight: 600;
 }
