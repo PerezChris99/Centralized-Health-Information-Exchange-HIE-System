@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Health Information Exchange</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Registration Form</h1>
+        <div class="progress-bar">
+            <div class="step active">Step 1</div>
+            <div class="step">Step 2</div>
+        </div>
+        <form id="registrationForm" class="registration-form">
+            <!-- Step 1 -->
+            <div class="form-step" id="step1">
+                <div class="form-group">
+                    <label for="userType">Register as:</label>
+                    <select id="userType" required>
+                        <option value="">Select user type</option>
+                        <option value="patient">Patient</option>
+                        <option value="healthcare-provider">Healthcare Provider</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="form-step" id="step2" style="display: none;">
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password:</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" required>
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="previousStep()">Previous</button>
+                    <button type="submit">Register</button>
+                </div>
+            </div>
+        </form>
+        <div class="form-group" style="text-align: center;">
+            <a href="login.html">Already have an account? Login here</a>
+        </div>
+    </div>
+    <script>
+        function nextStep() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.querySelectorAll('.step')[1].classList.add('active');
+        }
+
+        function previousStep() {
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.querySelectorAll('.step')[1].classList.remove('active');
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add your registration logic here
+            console.log('Form submitted');
+        });
+    </script>
+</body>
+</html>

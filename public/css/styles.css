@@ -377,3 +377,103 @@ body {
   background-color: var(--border-color);
   border-radius: 3px;
 }
+
+/* Registration Form Styles */
+.registration-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.registration-form .form-group {
+    margin-bottom: 20px;
+}
+
+.registration-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.registration-form input,
+.registration-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.registration-form input:focus,
+.registration-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.registration-form button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    width: 100%;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.registration-form button:hover {
+    background-color: var(--primary-dark);
+}
+
+.registration-form a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.registration-form a:hover {
+    text-decoration: underline;
+}
+
+/* Progress Bar and Form Steps */
+.progress-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+    max-width: 300px;
+    margin: 0 auto 20px;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #ddd;
+    z-index: 0;
+}
+
+.step {
+    background: white;
+    padding: 5px 15px;
+    border-radius: 15px;
+    border: 2px solid #ddd;
+    position: relative;
+    z-index: 1;
+}
+
+.step.active {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.form-step {
+    max-width: 300px;
+    margin: 0 auto;
+}
