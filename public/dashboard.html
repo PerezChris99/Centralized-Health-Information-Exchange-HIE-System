@@ -15,81 +15,92 @@
                 <i class="fas fa-hospital"></i>
                 HIE System
             </a>
-            <div class="d-flex align-items-center">
-                <span class="me-2 text-muted">
-                    <i class="fas fa-user-md"></i>
-                    Dr. John Doe
-                </span>
-                <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item me-2">
+                        <span class="nav-link text-muted">
+                            <i class="fas fa-user-md"></i>
+                            Dr. John Doe
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="dashboard-container">
-        <div class="row h-100 g-2">
-            <div class="col-md-4">
-                <div class="dashboard-panel">
-                    <div class="panel-header">
+    <div class="container-fluid py-3">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
                         <h6 class="mb-0">
                             <i class="fas fa-user-plus text-primary me-2"></i>
                             Add New Patient
                         </h6>
                     </div>
-                    <div class="panel-body">
-                        <form id="addPatientForm" class="form-panel">
-                            <div class="form-group">
+                    <div class="card-body">
+                        <form id="addPatientForm">
+                            <div class="mb-2">
                                 <label class="form-label small">Name</label>
-                                <input type="text" class="form-control" id="patientName" required>
+                                <input type="text" class="form-control form-control-sm" id="patientName" required>
                             </div>
-                            <div class="form-group">
+                            <div class="mb-2">
                                 <label class="form-label small">Age</label>
-                                <input type="number" class="form-control" id="patientAge" required>
+                                <input type="number" class="form-control form-control-sm" id="patientAge" required>
                             </div>
-                            <div class="form-group">
+                            <div class="mb-2">
                                 <label class="form-label small">Gender</label>
-                                <select class="form-control" id="patientGender" required>
+                                <select class="form-select form-select-sm" id="patientGender" required>
                                     <option value="">Select</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="mb-2">
                                 <label class="form-label small">Contact</label>
-                                <input type="text" class="form-control" id="patientContact" required>
+                                <input type="text" class="form-control form-control-sm" id="patientContact" required>
                             </div>
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label class="form-label small">Medical History</label>
-                                <textarea class="form-control" id="patientHistory"></textarea>
+                                <textarea class="form-control form-control-sm" id="patientHistory" rows="3"></textarea>
                             </div>
-                            <button type="submit" class="btn btn-medical btn-sm w-100">
-                                <i class="fas fa-plus-circle me-1"></i>
-                                Add Patient
-                            </button>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-medical btn-sm">
+                                    <i class="fas fa-plus-circle me-1"></i>
+                                    Add Patient
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
             
-            <div class="col-md-8">
-                <div class="dashboard-panel">
-                    <div class="panel-header d-flex justify-content-between align-items-center">
+            <div class="col-12 col-md-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                         <h6 class="mb-0">
                             <i class="fas fa-users text-primary me-2"></i>
                             Patient Records
                         </h6>
-                        <div class="input-group input-group-sm" style="width: 200px;">
+                        <div class="input-group input-group-sm" style="max-width: 200px;">
                             <span class="input-group-text">
                                 <i class="fas fa-search"></i>
                             </span>
                             <input type="text" class="form-control" placeholder="Search...">
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <div class="patient-list" id="patientList">
+                    <div class="card-body">
+                        <div class="row g-3" id="patientList">
                             <!-- Patient cards will be added here dynamically -->
                         </div>
                     </div>

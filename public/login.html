@@ -11,7 +11,7 @@
 <body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-5">
+            <div class="col-md-8 col-lg-5 col-xl-4 col-sm-10">
                 <div class="auth-card fade-in">
                     <div class="text-center">
                         <div class="medical-icon">
@@ -21,21 +21,23 @@
                         <p class="text-muted mb-4">Sign in to access the health information exchange system</p>
                     </div>
                     <form id="loginForm">
-                        <div class="medical-form-group">
-                            <label class="medical-label">
+                        <div class="mb-3">
+                            <label class="form-label">
                                 <i class="fas fa-user text-muted me-2"></i>Username
                             </label>
                             <input type="text" class="form-control" id="username" required>
                         </div>
-                        <div class="medical-form-group">
-                            <label class="medical-label">
+                        <div class="mb-3">
+                            <label class="form-label">
                                 <i class="fas fa-lock text-muted me-2"></i>Password
                             </label>
                             <input type="password" class="form-control" id="password" required>
                         </div>
-                        <button type="submit" class="btn btn-medical w-100 mb-3">
-                            Sign In
-                        </button>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-medical mb-3">
+                                Sign In
+                            </button>
+                        </div>
                         <div class="text-center text-muted">
                             <small>Don't have an account? <a href="/register.html" style="color: var(--primary-color)">Register here</a></small>
                         </div>
