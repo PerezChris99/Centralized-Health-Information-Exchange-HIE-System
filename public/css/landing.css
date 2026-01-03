@@ -1,0 +1,647 @@
+/**
+ * Health Information Exchange System - Landing Page Styles
+ * Extends main.css for public facing pages (Home, FAQ, Contact)
+ */
+
+/* ========================================
+   Variables & Overrides
+   ======================================== */
+:root {
+    --uganda-black: #000000;
+    --uganda-yellow: #FCDC04;
+    --uganda-red: #D90000;
+    --hero-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+/* ========================================
+   Navigation
+   ======================================== */
+.navbar {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    padding: 1rem 0;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary-color) !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-primary) !important;
+    margin: 0 0.5rem;
+    transition: color 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+.btn-login {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-signup {
+    background: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-signup:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   Hero Section
+   ======================================== */
+.hero-section {
+    background: var(--hero-gradient);
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding-top: 80px; /* Account for fixed navbar */
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255,255,255,0.95);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.hero-buttons .btn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-hero-primary {
+    background: white;
+    color: var(--primary-color);
+    border: 2px solid white;
+    font-weight: 700;
+}
+
+.btn-hero-primary:hover {
+    background: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.btn-hero-secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255,255,255,0.5);
+    font-weight: 600;
+}
+
+.btn-hero-secondary:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: white;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.hero-image-container {
+    position: relative;
+    perspective: 1000px;
+}
+
+.hero-image img {
+    max-width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: rotateY(-5deg) rotateX(5deg);
+    transition: transform 0.5s ease;
+}
+
+.hero-image:hover img {
+    transform: rotateY(0) rotateX(0);
+}
+
+.floating-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    position: absolute;
+    animation: float 6s ease-in-out infinite;
+    z-index: 2;
+    max-width: 200px;
+}
+
+.floating-card-1 {
+    top: 10%;
+    right: -5%;
+    animation-delay: 0s;
+}
+
+.floating-card-2 {
+    bottom: 15%;
+    left: -5%;
+    animation-delay: 3s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* ========================================
+   Page Headers (FAQ, Contact)
+   ======================================== */
+.page-hero {
+    background: var(--hero-gradient);
+    padding: 8rem 0 5rem;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.page-hero h1 {
+    font-weight: 800;
+    margin-bottom: 1rem;
+    font-size: 3rem;
+}
+
+.page-hero .lead {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   Features Section
+   ======================================== */
+.features-section {
+    padding: 6rem 0;
+    background: var(--bg-primary);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 4rem;
+    text-align: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    height: 100%;
+    border: 1px solid var(--border-color);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 10px 20px rgba(44, 122, 123, 0.2);
+}
+
+.feature-card h4 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   Case Study / Content Sections
+   ======================================== */
+.case-study-section {
+    padding: 6rem 0;
+    background: white;
+}
+
+.uganda-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--uganda-black) 0%, #333 100%);
+    color: var(--uganda-yellow);
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.uganda-badge i {
+    color: var(--uganda-red);
+    margin-right: 0.5rem;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ========================================
+   FAQ Styles
+   ======================================== */
+.faq-section {
+    padding: 5rem 0;
+    background: var(--bg-primary);
+}
+
+.accordion-item {
+    border: none;
+    margin-bottom: 1rem;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.accordion-button {
+    padding: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: white;
+    font-size: 1.1rem;
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--primary-color);
+    background-color: rgba(44, 122, 123, 0.05);
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(44, 122, 123, 0.1);
+}
+
+.accordion-body {
+    padding: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* Custom Accordion Enhancements */
+.custom-accordion .accordion-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-accordion .accordion-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md) !important;
+}
+
+.custom-accordion .accordion-button:not(.collapsed) {
+    background-color: rgba(44, 122, 123, 0.08); /* Slightly darker active state */
+}
+
+.custom-accordion .accordion-button::after {
+    background-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+/* ========================================
+   Contact Styles
+   ======================================== */
+.contact-section {
+    padding: 5rem 0;
+    background: var(--bg-primary);
+    overflow: hidden; /* Ensure decorative elements don't spill */
+}
+
+.contact-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Specific override for the large form card to not lift on hover if desired, 
+   or keep it for consistency. Let's keep it subtle. */
+.col-lg-8 .contact-card:hover {
+    transform: none; /* The form is too big to move */
+    box-shadow: var(--shadow-lg);
+}
+
+.contact-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.contact-card:hover .contact-icon {
+    transform: scale(1.1);
+}
+
+/* Small lift for inner links */
+.hover-lift-sm {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.hover-lift-sm:hover {
+    transform: translateY(-2px);
+    background-color: rgba(0,0,0,0.05) !important; /* Slightly darker on hover */
+}
+
+/* Map Card Zoom Effect */
+.group-hover-zoom {
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.group-hover-zoom .bg-light {
+    transition: transform 0.5s ease;
+}
+
+.group-hover-zoom:hover .bg-light {
+    transform: scale(1.05);
+}
+
+/* Form Floating Overrides */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--primary-color);
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.form-floating > .form-control:focus {
+    box-shadow: none;
+    border: 1px solid var(--primary-color) !important; /* Force border on focus */
+    background-color: white !important;
+}
+
+/* Success Message Animation */
+.success-message {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Utilities */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-lg);
+}
+
+.opacity-5 {
+    opacity: 0.05 !important;
+}
+
+.opacity-25 {
+    opacity: 0.25 !important;
+}
+
+
+/* ========================================
+   Footer
+   ======================================== */
+.footer {
+    background: #1a202c;
+    color: white;
+    padding: 4rem 0 2rem;
+}
+
+.footer-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-links a {
+    color: #a0aec0;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    transition: all 0.3s;
+}
+
+.social-links a:hover {
+    background: var(--primary-color);
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 2rem;
+    margin-top: 3rem;
+    text-align: center;
+    color: #718096;
+}
+
+.uganda-stripe {
+    height: 6px;
+    background: linear-gradient(to right, 
+        var(--uganda-black) 0%, var(--uganda-black) 33.33%, 
+        var(--uganda-yellow) 33.33%, var(--uganda-yellow) 66.66%, 
+        var(--uganda-red) 66.66%, var(--uganda-red) 100%);
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+@media (max-width: 991px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-image-container {
+        margin-top: 3rem;
+    }
+    
+    .floating-card {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        text-align: center;
+        padding-top: 100px;
+    }
+    
+    .hero-buttons {
+        justify-content: center;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .hero-buttons .btn {
+        margin: 0.5rem;
+    }
+    
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}

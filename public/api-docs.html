@@ -1,226 +1,449 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>API Documentation - Health Information Exchange</title>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="css/style.css">
-   </head>
-   <body>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-         <div class="container">
-            <a class="navbar-brand" href="#">Health Information Exchange</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="API Documentation - Health Information Exchange System">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    
+    <title>API Documentation - Health Information Exchange</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Compact navbar overrides */
+        .navbar-medical { padding: 0.3rem 0.5rem; }
+        .navbar-brand { font-size: 0.9rem; }
+        .nav-link { font-size: 0.75rem; padding: 0.3rem 0.5rem !important; }
+        .navbar .btn-sm { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+        /* API docs compact */
+        .api-docs h3 { font-size: 0.95rem; }
+        .api-docs h4 { font-size: 0.85rem; }
+        .api-docs p, .api-docs li { font-size: 0.75rem; }
+        .api-docs code { font-size: 0.7rem; }
+        .api-docs pre { font-size: 0.65rem; padding: 0.5rem; }
+        .api-docs .badge { font-size: 0.6rem; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-medical navbar-expand-lg sticky-top">
+        <div class="container-fluid px-2">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-heartbeat me-1"></i>HIE Uganda
+            </a>
+            
+            <button class="navbar-toggler btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" style="font-size: 0.8rem;">
+                <i class="fas fa-bars"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-               <ul class="navbar-nav ms-auto">
-                  <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
-                  <li class="nav-item"><a class="nav-link active" href="api-docs.html">API Documentation</a></li>
-                  <li class="nav-item"><a class="nav-link" href="logout.html">Logout</a></li>
-               </ul>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-1 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="api-docs.html">
+                            <i class="fas fa-book me-1"></i>API
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav ms-auto mb-1 mb-lg-0 align-items-lg-center">
+                    <li class="nav-item me-2">
+                        <span class="nav-link py-1">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userDisplay">User</span>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <button id="logoutBtn" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </button>
+                    </li>
+                </ul>
             </div>
-         </div>
-      </nav>
-      <div class="container my-4">
-         <h1 class="mb-4">API Documentation</h1>
-         <div class="row">
-            <div class="col-md-3 mb-4">
-               <div class="list-group">
-                  <a href="#authentication" class="list-group-item list-group-item-action">Authentication</a>
-                  <a href="#patients" class="list-group-item list-group-item-action">Patient Endpoints</a>
-                  <a href="#records" class="list-group-item list-group-item-action">Medical Records</a>
-                  <a href="#hospitals" class="list-group-item list-group-item-action">Healthcare Providers</a>
-               </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container py-2 api-docs">
+        <div class="row g-2">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3 mb-2">
+                <div class="card sticky-top" style="top: 50px;">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-list me-2"></i>API Endpoints</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="#authentication" class="list-group-item list-group-item-action">
+                            <i class="fas fa-key me-2 text-muted"></i>Authentication
+                        </a>
+                        <a href="#patients" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users me-2 text-muted"></i>Patients
+                        </a>
+                        <a href="#appointments" class="list-group-item list-group-item-action">
+                            <i class="fas fa-calendar me-2 text-muted"></i>Appointments
+                        </a>
+                        <a href="#medical-records" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-medical me-2 text-muted"></i>Medical Records
+                        </a>
+                        <a href="#users" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-cog me-2 text-muted"></i>Users
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-9">
-               <!-- Authentication Section -->
-               <div class="card mb-4">
-                  <div class="card-header" id="authentication">
-                     <h2 class="h5 mb-0">Authentication</h2>
-                  </div>
-                  <div class="card-body">
-                     <!-- Register Endpoint -->
-                     <div class="mb-4">
-                        <h3 class="h6">POST /api/auth/register</h3>
-                        <p>Register a new user</p>
-                        <h4>Request Body:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "username": "doctor1",
+
+            <!-- API Documentation -->
+            <div class="col-lg-9">
+                <h1 class="mb-4">API Documentation</h1>
+                <p class="lead text-muted mb-4">
+                    Complete reference for the Health Information Exchange System REST API.
+                    All endpoints require authentication unless otherwise noted.
+                </p>
+
+                <!-- Base URL -->
+                <div class="alert alert-info mb-4">
+                    <strong>Base URL:</strong> <code>http://localhost:5000/api</code>
+                </div>
+
+                <!-- Authentication Section -->
+                <section id="authentication" class="mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-key me-2"></i>Authentication</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Register -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-post">POST</span>
+                                    <code class="api-endpoint">/auth/register</code>
+                                </h5>
+                                <p>Register a new user account.</p>
+                                <h6>Request Body:</h6>
+                                <pre><code>{
+    "name": "John Doe",
+    "email": "john@example.com",
     "password": "password123",
-    "role": "doctor"
+    "role": "user"  // Optional: "user", "provider", or "admin"
 }</code></pre>
-                        <h4>Response:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "token": "jwt_token_here"
+                                <h6>Response:</h6>
+                                <pre><code>{
+    "success": true,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "role": "user"
+    }
 }</code></pre>
-                     </div>
-                     <!-- Login Endpoint -->
-                     <div>
-                        <h3 class="h6">POST /api/auth/login</h3>
-                        <p>Login a user</p>
-                        <h4>Request Body:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "username": "doctor1",
+                            </div>
+
+                            <!-- Login -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-post">POST</span>
+                                    <code class="api-endpoint">/auth/login</code>
+                                </h5>
+                                <p>Login and receive JWT token.</p>
+                                <h6>Request Body:</h6>
+                                <pre><code>{
+    "email": "john@example.com",
     "password": "password123"
 }</code></pre>
-                        <h4>Response:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "token": "jwt_token_here"
-}</code></pre>
-                     </div>
-                  </div>
-               </div>
-               <!-- Patients Section -->
-               <div class="card mb-4">
-                  <div class="card-header" id="patients">
-                     <h2 class="h5 mb-0">Patient Endpoints</h2>
-                  </div>
-                  <div class="card-body">
-                     <!-- Get All Patients Endpoint -->
-                     <div class="mb-4">
-                        <h3 class="h6">GET /api/patients</h3>
-                        <p>Get all patients</p>
-                        <h4>Headers:</h4>
-                        <pre class="bg-light p-3 rounded"><code>Authorization: Bearer jwt_token_here</code></pre>
-                        <h4>Response:</h4>
-                        <pre class="bg-light p-3 rounded"><code>[
-    {
-        "_id": "60f1b5b5e6c8a32a4c9b3f1c",
-        "name": "John Doe",
-        "age": 45,
-        "gender": "male",
-        "contactInfo": "john.doe@example.com",
-        "medicalHistory": ["Hypertension", "Diabetes"]
-    }
-]</code></pre>
-                     </div>
-                     <!-- Create Patient Endpoint -->
-                     <div>
-                        <h3 class="h6">POST /api/patients</h3>
-                        <p>Create a new patient</p>
-                        <h4>Headers:</h4>
-                        <pre class="bg-light p-3 rounded"><code>Authorization: Bearer jwt_token_here</code></pre>
-                        <h4>Request Body:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "name": "Jane Smith",
-    "age": 35,
-    "gender": "female",
-    "contactInfo": "jane.smith@example.com",
-    "medicalHistory": ["Asthma"]
-}</code></pre>
-                        <h4>Response:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "_id": "60f1b5b5e6c8a32a4c9b3f1d",
-    "name": "Jane Smith",
-    "age": 35,
-    "gender": "female",
-    "contactInfo": "jane.smith@example.com",
-    "medicalHistory": ["Asthma"]
-}</code></pre>
-                     </div>
-                  </div>
-               </div>
-               <!-- Medical Records Section -->
-               <div class="card mb-4">
-                  <div class="card-header" id="records">
-                     <h2 class="h5 mb-0">Medical Records</h2>
-                  </div>
-                  <div class="card-body">
-                     <h3 class="h6">GET /api/medical-records/patient/:patientId</h3>
-                     <p>Get all medical records for a patient</p>
-                     <h4>Headers:</h4>
-                     <pre class="bg-light p-3 rounded"><code>Authorization: Bearer jwt_token_here</code></pre>
-                     <h4>Response:</h4>
-                     <pre class="bg-light p-3 rounded"><code>{
+                                <h6>Response:</h6>
+                                <pre><code>{
     "success": true,
-    "count": 1,
-    "data": [
-        {
-            "_id": "60f1b5b5e6c8a32a4c9b3f1e",
-            "patient": {
-                "_id": "60f1b5b5e6c8a32a4c9b3f1c",
-                "name": "John Doe"
-            },
-            "provider": {
-                "_id": "60f1b5b5e6c8a32a4c9b3f1b",
-                "username": "doctor1"
-            },
-            "visitDate": "2023-07-15T10:30:00.000Z",
-            "diagnosis": [
-                {
-                    "code": "I10",
-                    "description": "Essential hypertension"
-                }
-            ],
-            "medications": [
-                {
-                    "name": "Lisinopril",
-                    "dosage": "10mg",
-                    "frequency": "Once daily"
-                }
-            ]
-        }
-    ]
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }</code></pre>
-                  </div>
-               </div>
-               <!-- Healthcare Providers Section -->
-               <div class="card mb-4">
-                  <div class="card-header" id="hospitals">
-                     <h2 class="h5 mb-0">Healthcare Providers</h2>
-                  </div>
-                  <div class="card-body">
-                     <!-- Get All Providers Endpoint -->
-                     <div class="mb-4">
-                        <h3 class="h6">GET /api/providers</h3>
-                        <p>Get all healthcare providers</p>
-                        <h4>Headers:</h4>
-                        <pre class="bg-light p-3 rounded"><code>Authorization: Bearer jwt_token_here</code></pre>
-                        <h4>Response:</h4>
-                        <pre class="bg-light p-3 rounded"><code>[
-    {
-        "_id": "60f1b5b5e6c8a32a4c9b3f1b",
-        "name": "General Hospital",
-        "address": "123 Main Street, Cityville",
-        "specialties": ["Cardiology", "Neurology", "Pediatrics"],
-        "contact": "+1-555-123-4567"
-    }
-]</code></pre>
-                     </div>
-                     <!-- Get Provider by ID Endpoint -->
-                     <div>
-                        <h3 class="h6">GET /api/providers/:id</h3>
-                        <p>Get details for a specific healthcare provider</p>
-                        <h4>Headers:</h4>
-                        <pre class="bg-light p-3 rounded"><code>Authorization: Bearer jwt_token_here</code></pre>
-                        <h4>Response:</h4>
-                        <pre class="bg-light p-3 rounded"><code>{
-    "_id": "60f1b5b5e6c8a32a4c9b3f1b",
-    "name": "General Hospital",
-    "address": "123 Main Street, Cityville",
-    "specialties": ["Cardiology", "Neurology", "Pediatrics"],
-    "contact": "+1-555-123-4567",
-    "doctors": [
-        {
-            "_id": "60f1b5b5e6c8a32a4c9b3f1a",
-            "name": "Dr. Sarah Johnson",
-            "specialty": "Cardiology"
-        }
-    ]
+                            </div>
+
+                            <!-- Get Current User -->
+                            <div>
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/auth/me</code>
+                                </h5>
+                                <p>Get current authenticated user information.</p>
+                                <h6>Headers:</h6>
+                                <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Patients Section -->
+                <section id="patients" class="mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-users me-2"></i>Patients</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Get All Patients -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/patients</code>
+                                </h5>
+                                <p>Retrieve all patients.</p>
+                            </div>
+
+                            <!-- Get Patient by ID -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/patients/:id</code>
+                                </h5>
+                                <p>Retrieve a specific patient by ID.</p>
+                            </div>
+
+                            <!-- Create Patient -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-post">POST</span>
+                                    <code class="api-endpoint">/patients</code>
+                                </h5>
+                                <p>Create a new patient record.</p>
+                                <h6>Request Body:</h6>
+                                <pre><code>{
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "dateOfBirth": "1990-05-15",
+    "gender": "Female",
+    "email": "jane@example.com",
+    "contactNumber": "555-0123",
+    "address": "123 Main St",
+    "medicalHistory": ["Diabetes", "Hypertension"]
 }</code></pre>
-                     </div>
-                  </div>
-               </div>
+                            </div>
+
+                            <!-- Update Patient -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-put">PUT</span>
+                                    <code class="api-endpoint">/patients/:id</code>
+                                </h5>
+                                <p>Update a patient record.</p>
+                            </div>
+
+                            <!-- Delete Patient -->
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-delete">DELETE</span>
+                                    <code class="api-endpoint">/patients/:id</code>
+                                </h5>
+                                <p>Delete a patient record.</p>
+                            </div>
+
+                            <!-- Search Patients -->
+                            <div>
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/patients/search?q=query</code>
+                                </h5>
+                                <p>Search patients by name or email.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Appointments Section -->
+                <section id="appointments" class="mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-calendar me-2"></i>Appointments</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/appointments</code>
+                                </h5>
+                                <p>Retrieve all appointments.</p>
+                            </div>
+
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-post">POST</span>
+                                    <code class="api-endpoint">/appointments</code>
+                                </h5>
+                                <p>Create a new appointment.</p>
+                                <h6>Request Body:</h6>
+                                <pre><code>{
+    "patient": 1,
+    "doctor": 2,
+    "date": "2024-01-15T10:00:00Z",
+    "reason": "Annual checkup"
+}</code></pre>
+                            </div>
+
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/appointments/patient/:patientId</code>
+                                </h5>
+                                <p>Get all appointments for a specific patient.</p>
+                            </div>
+
+                            <div>
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/appointments/doctor/:doctorId</code>
+                                </h5>
+                                <p>Get all appointments for a specific doctor.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Medical Records Section -->
+                <section id="medical-records" class="mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-file-medical me-2"></i>Medical Records</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/medical-records</code>
+                                </h5>
+                                <p>Retrieve all medical records.</p>
+                            </div>
+
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/medical-records/patient/:patientId</code>
+                                </h5>
+                                <p>Get all medical records for a specific patient.</p>
+                            </div>
+
+                            <div>
+                                <h5>
+                                    <span class="method-post">POST</span>
+                                    <code class="api-endpoint">/medical-records</code>
+                                </h5>
+                                <p>Create a new medical record.</p>
+                                <h6>Request Body:</h6>
+                                <pre><code>{
+    "patient": 1,
+    "visitDate": "2024-01-15T10:00:00Z",
+    "diagnosis": [
+        {"code": "I10", "description": "Essential hypertension"}
+    ],
+    "medications": [
+        {"name": "Lisinopril", "dosage": "10mg", "frequency": "Once daily"}
+    ],
+    "vitalSigns": {
+        "bloodPressure": "120/80",
+        "heartRate": 72,
+        "temperature": 98.6
+    },
+    "notes": "Patient is responding well to treatment."
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users" class="mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-user-cog me-2"></i>Users</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/users</code>
+                                </h5>
+                                <p>Retrieve all users (Admin only).</p>
+                            </div>
+
+                            <div class="mb-4 pb-4 border-bottom">
+                                <h5>
+                                    <span class="method-get">GET</span>
+                                    <code class="api-endpoint">/users/providers</code>
+                                </h5>
+                                <p>Get all healthcare providers.</p>
+                            </div>
+
+                            <div>
+                                <h5>
+                                    <span class="method-put">PUT</span>
+                                    <code class="api-endpoint">/users/:id</code>
+                                </h5>
+                                <p>Update user information.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-         </div>
-      </div>
-      <footer class="bg-light py-3 mt-5">
-         <div class="container text-center">
-            <p class="text-muted">© 2023 Health Information Exchange System</p>
-         </div>
-      </footer>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   </body>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-3 border-top bg-white">
+        <div class="container">
+            <small class="text-muted">
+                &copy; 2024 Health Information Exchange System. All rights reserved.
+            </small>
+        </div>
+    </footer>
+
+    <!-- External JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+    
+    <!-- Auth & Role Check -->
+    <script>
+        // Redirect to login if not authenticated, or dashboard if not admin
+        (function() {
+            const token = localStorage.getItem('hie_token');
+            const userData = localStorage.getItem('hie_user');
+            
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(userData);
+                if (user.role !== 'admin') {
+                    alert('Access denied. API documentation is restricted to administrators only.');
+                    window.location.href = '/dashboard.html';
+                    return;
+                }
+            } catch (e) {
+                window.location.href = '/login.html';
+            }
+        })();
+    </script>
+</body>
 </html>

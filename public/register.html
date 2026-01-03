@@ -3,98 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Register - Health Information Exchange System">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    
     <title>Register - Health Information Exchange</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .auth-navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            padding: 0.5rem 0;
+        }
+        .auth-navbar .navbar-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0d6efd !important;
+        }
+        .auth-navbar .nav-link {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #333 !important;
+            padding: 0.4rem 0.75rem;
+        }
+        .auth-navbar .nav-link:hover {
+            color: #0d6efd !important;
+        }
+        .auth-navbar .btn-login {
+            border: 2px solid #0d6efd;
+            color: #0d6efd;
+            border-radius: 18px;
+            padding: 0.35rem 1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .auth-navbar .btn-login:hover {
+            background: #0d6efd;
+            color: white;
+        }
+        body.bg-primary-light {
+            padding-top: 60px;
+        }
+        .auth-card {
+            padding: 1.25rem;
+        }
+        .auth-card .medical-icon {
+            width: 55px;
+            height: 55px;
+            font-size: 1.4rem;
+            margin: 0 auto 0.75rem;
+        }
+        .auth-card h2 {
+            font-size: 1.2rem;
+        }
+        .auth-card p {
+            font-size: 0.9rem;
+        }
+        .auth-card .form-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        .auth-card .form-control,
+        .auth-card .form-select {
+            font-size: 0.9rem;
+            padding: 0.45rem 0.6rem;
+        }
+        .auth-card .form-text {
+            font-size: 0.8rem;
+        }
+        .auth-card .btn {
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+        }
+        .progress-steps {
+            margin-bottom: 1.25rem;
+        }
+        .progress-steps .step {
+            font-size: 0.85rem;
+        }
+        .progress-steps .step-number {
+            width: 26px;
+            height: 26px;
+            font-size: 0.8rem;
+        }
+        .container {
+            padding-top: 1.25rem;
+            padding-bottom: 1.25rem;
+        }
+    </style>
 </head>
-<body>
-    <div class="container py-4">
+<body class="bg-primary-light">
+    <!-- Navigation -->
+    <nav class="navbar auth-navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-heartbeat me-2"></i>HIE Uganda
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#authNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="authNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html"><i class="fas fa-home me-1"></i>Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/faq.html"><i class="fas fa-question-circle me-1"></i>FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact.html"><i class="fas fa-envelope me-1"></i>Contact</a>
+                    </li>
+                </ul>
+                <a href="/login.html" class="btn btn-login">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <h1 class="text-center mb-4">Registration Form</h1>
-                        <div class="progress-bar d-flex justify-content-between mb-4 mx-auto" style="max-width: 300px;">
-                            <div class="step active">Step 1</div>
-                            <div class="step">Step 2</div>
+            <div class="col-lg-6 col-md-8">
+                <div class="auth-card fade-in" style="max-width: 100%;">
+                    <!-- Logo & Header -->
+                    <div class="text-center mb-4">
+                        <div class="medical-icon">
+                            <i class="fas fa-user-plus"></i>
                         </div>
-                        <form id="registrationForm" class="registration-form">
-                            <!-- Step 1 -->
-                            <div class="form-step" id="step1">
-                                <div class="mb-3">
-                                    <label for="userType" class="form-label">Register as:</label>
-                                    <select id="userType" class="form-select" required>
-                                        <option value="">Select user type</option>
-                                        <option value="patient">Patient</option>
-                                        <option value="healthcare-provider">Healthcare Provider</option>
-                                        <option value="admin">Administrator</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="fullName" class="form-label">Full Name:</label>
-                                    <input type="text" class="form-control" id="fullName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email:</label>
-                                    <input type="email" class="form-control" id="email" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password:</label>
-                                    <input type="password" class="form-control" id="password" required>
-                                </div>
-                                <div class="d-grid">
-                                    <button type="button" class="btn btn-medical" onclick="nextStep()">Next</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 2 -->
-                            <div class="form-step" id="step2" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="confirmPassword" class="form-label">Confirm Password:</label>
-                                    <input type="password" class="form-control" id="confirmPassword" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Phone Number:</label>
-                                    <input type="tel" class="form-control" id="phone" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="address" class="form-label">Address:</label>
-                                    <input type="text" class="form-control" id="address" required>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-outline-secondary flex-grow-1" onclick="previousStep()">Previous</button>
-                                    <button type="submit" class="btn btn-medical flex-grow-1">Register</button>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="text-center mt-3">
-                            <a href="login.html">Already have an account? Login here</a>
+                        <h2 class="text-primary-color mb-2">Create Account</h2>
+                        <p class="text-muted">Join the Health Information Exchange System</p>
+                    </div>
+
+                    <!-- Progress Steps -->
+                    <div class="progress-steps mb-4">
+                        <div class="step active" id="stepIndicator1">
+                            <span class="step-number">1</span>
+                            <span>Account</span>
+                        </div>
+                        <div class="step" id="stepIndicator2">
+                            <span class="step-number">2</span>
+                            <span>Details</span>
                         </div>
                     </div>
+
+                    <!-- Registration Form -->
+                    <form id="registrationForm" novalidate>
+                        <!-- Step 1: Account Information -->
+                        <div id="step1">
+                            <div class="mb-3">
+                                <label for="userType" class="form-label">
+                                    <i class="fas fa-user-tag text-muted me-2"></i>Account Type
+                                </label>
+                                <select id="userType" class="form-select" required>
+                                    <option value="">Select your role</option>
+                                    <option value="user">Patient</option>
+                                    <option value="healthcare-provider">Healthcare Provider</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">
+                                    <i class="fas fa-user text-muted me-2"></i>Full Name
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="fullName" 
+                                    placeholder="Enter your full name"
+                                    autocomplete="name"
+                                    required
+                                >
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope text-muted me-2"></i>Email Address
+                                </label>
+                                <input 
+                                    type="email" 
+                                    class="form-control" 
+                                    id="email" 
+                                    placeholder="Enter your email"
+                                    autocomplete="email"
+                                    required
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock text-muted me-2"></i>Password
+                                </label>
+                                <input 
+                                    type="password" 
+                                    class="form-control" 
+                                    id="password" 
+                                    placeholder="Create a strong password (min 6 characters)"
+                                    autocomplete="new-password"
+                                    minlength="6"
+                                    required
+                                >
+                                <div class="form-text">Password must be at least 6 characters</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-medical" id="nextStepBtn">
+                                    Next <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Additional Details -->
+                        <div id="step2" style="display: none;">
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">
+                                    <i class="fas fa-lock text-muted me-2"></i>Confirm Password
+                                </label>
+                                <input 
+                                    type="password" 
+                                    class="form-control" 
+                                    id="confirmPassword" 
+                                    placeholder="Confirm your password"
+                                    autocomplete="new-password"
+                                    required
+                                >
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">
+                                    <i class="fas fa-phone text-muted me-2"></i>Phone Number
+                                </label>
+                                <input 
+                                    type="tel" 
+                                    class="form-control" 
+                                    id="phone" 
+                                    placeholder="Enter your phone number"
+                                    autocomplete="tel"
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="address" class="form-label">
+                                    <i class="fas fa-map-marker-alt text-muted me-2"></i>Address
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="address" 
+                                    placeholder="Enter your address"
+                                    autocomplete="street-address"
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="termsAccept" required>
+                                    <label class="form-check-label small text-muted" for="termsAccept">
+                                        I agree to the <a href="#" class="text-primary-color">Terms of Service</a> 
+                                        and <a href="#" class="text-primary-color">Privacy Policy</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary flex-grow-1" id="prevStepBtn">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </button>
+                                <button type="submit" class="btn btn-medical flex-grow-1">
+                                    <i class="fas fa-user-plus me-2"></i>Register
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-4">
+                        <span class="text-muted small">Already have an account? </span>
+                        <a href="login.html" class="text-primary-color small">Sign in here</a>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        &copy; 2024 Health Information Exchange System. All rights reserved.
+                    </small>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- External JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+    
+    <!-- Page-specific JS -->
     <script>
-        function nextStep() {
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-            document.querySelectorAll('.step')[1].classList.add('active');
-        }
+        // Step navigation
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const stepIndicator1 = document.getElementById('stepIndicator1');
+        const stepIndicator2 = document.getElementById('stepIndicator2');
+        const nextStepBtn = document.getElementById('nextStepBtn');
+        const prevStepBtn = document.getElementById('prevStepBtn');
 
-        function previousStep() {
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('step2').style.display = 'none';
-            document.querySelectorAll('.step')[1].classList.remove('active');
-        }
+        nextStepBtn.addEventListener('click', function() {
+            // Validate step 1
+            const userType = document.getElementById('userType').value;
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
 
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Add your registration logic here
-            console.log('Form submitted');
+            if (!userType || !fullName || !email || !password) {
+                HIE.notifications.warning('Please fill in all fields');
+                return;
+            }
+
+            if (password.length < 6) {
+                HIE.notifications.warning('Password must be at least 6 characters');
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                HIE.notifications.warning('Please enter a valid email address');
+                return;
+            }
+
+            // Show step 2
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+            stepIndicator2.classList.add('active');
         });
+
+        prevStepBtn.addEventListener('click', function() {
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+            stepIndicator2.classList.remove('active');
+        });
+
+        // Redirect if already logged in (validate token first)
+        (async function() {
+            if (HIE.auth.isAuthenticated()) {
+                try {
+                    // Validate token by making an API call
+                    await HIE.api.getPatients();
+                    window.location.href = '/dashboard.html';
+                } catch (e) {
+                    // Token is invalid, clear it (don't use logout which redirects)
+                    HIE.auth.clearAuth();
+                }
+            }
+        })();
     </script>
 </body>
 </html>

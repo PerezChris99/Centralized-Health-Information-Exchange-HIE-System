@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Contact Us - Health Information Exchange System Uganda">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    
+    <title>Contact Us - Health Information Exchange Uganda</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-heartbeat text-success"></i>HIE Uganda
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/faq.html">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/contact.html">Contact</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav gap-2" id="authButtons">
+                    <li class="nav-item">
+                        <a class="btn btn-login" href="/login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-signup" href="/register.html">Sign Up</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav gap-2 align-items-center" id="userMenu" style="display: none;">
+                    <li class="nav-item">
+                        <a class="btn btn-primary btn-sm rounded-pill px-3" href="/dashboard.html" id="dashboardLink">
+                            <i class="fas fa-columns me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="#" id="logoutBtn" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1><i class="fas fa-envelope me-3"></i>Contact Us</h1>
+            <p class="lead mb-0">Get in touch with our team for support, inquiries, or partnership opportunities</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section position-relative">
+        <!-- Decorative Background Elements -->
+        <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style="z-index: 0; pointer-events: none;">
+            <div class="position-absolute top-0 end-0 bg-primary opacity-5 rounded-circle" style="width: 300px; height: 300px; filter: blur(80px); transform: translate(30%, -30%);"></div>
+            <div class="position-absolute bottom-0 start-0 bg-warning opacity-5 rounded-circle" style="width: 400px; height: 400px; filter: blur(100px); transform: translate(-30%, 30%);"></div>
+        </div>
+
+        <div class="container position-relative" style="z-index: 1;">
+            <div class="row g-4">
+                <!-- Contact Info -->
+                <div class="col-lg-4">
+                    <div class="d-flex flex-column gap-4 h-100">
+                        <!-- Info Cards -->
+                        <div class="contact-card p-4 border-0 h-auto">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="contact-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                                    <i class="fas fa-map-marker-alt fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Visit Us</h5>
+                                    <p class="text-muted mb-0 small">Ministry of Health HQ</p>
+                                </div>
+                            </div>
+                            <p class="text-secondary mb-3 ps-2 border-start border-3 border-primary">
+                                Plot 6, Lourdel Road<br>
+                                Nakasero, Kampala<br>
+                                Uganda
+                            </p>
+                            <!-- Embedded Map -->
+                            <div class="rounded-3 overflow-hidden position-relative group-hover-zoom" style="height: 200px;">
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.757316827654!2d32.57612831475324!3d0.3162225997705664!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177dbb74ca543001%3A0x7421e6466910d023!2sMinistry%20of%20Health!5e0!3m2!1sen!2sug!4v1646834567890!5m2!1sen!2sug" 
+                                    width="100%" 
+                                    height="100%" 
+                                    style="border:0;" 
+                                    allowfullscreen="" 
+                                    loading="lazy">
+                                </iframe>
+                                <a href="https://goo.gl/maps/MinistryOfHealthUganda" target="_blank" class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-75 text-white text-center py-2 text-decoration-none small opacity-0 hover-opacity-100 transition-all">
+                                    View Larger Map <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Combined Contact Info Card -->
+                        <div class="contact-card p-4 border-0 h-auto">
+                            <!-- Phone Section -->
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="contact-icon bg-success bg-opacity-10 text-success rounded-circle p-3 me-3 mt-1">
+                                    <i class="fas fa-phone-alt fa-lg"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1">Call Us</h5>
+                                    <p class="text-muted small mb-3">Mon-Fri from 8am to 5pm</p>
+                                    
+                                    <div class="d-flex flex-column gap-2">
+                                        <a href="tel:+256700000000" class="text-decoration-none text-dark d-flex align-items-center justify-content-between p-2 rounded bg-light bg-opacity-50 hover-lift-sm transition-all">
+                                            <span class="fw-medium small">+256 700 000 000</span>
+                                            <span class="badge bg-white text-dark border shadow-sm">General</span>
+                                        </a>
+                                        <a href="tel:+256701000000" class="text-decoration-none text-dark d-flex align-items-center justify-content-between p-2 rounded bg-light bg-opacity-50 hover-lift-sm transition-all">
+                                            <span class="fw-medium small">+256 701 000 000</span>
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10">Emergency</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-secondary border-opacity-10">
+
+                            <!-- Email Section -->
+                            <div class="d-flex align-items-start">
+                                <div class="contact-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3 mt-1">
+                                    <i class="fas fa-envelope fa-lg"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1">Email Us</h5>
+                                    <p class="text-muted small mb-3">We reply within 24 hours</p>
+                                    
+                                    <div class="d-flex flex-column gap-2">
+                                        <a href="mailto:info@hie-uganda.org" class="text-decoration-none text-dark d-flex align-items-center p-2 rounded bg-light bg-opacity-50 hover-lift-sm transition-all">
+                                            <i class="fas fa-inbox me-2 text-muted"></i>
+                                            <span class="small">info@hie-uganda.org</span>
+                                        </a>
+                                        <a href="mailto:support@hie-uganda.org" class="text-decoration-none text-dark d-flex align-items-center p-2 rounded bg-light bg-opacity-50 hover-lift-sm transition-all">
+                                            <i class="fas fa-tools me-2 text-muted"></i>
+                                            <span class="small">support@hie-uganda.org</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form & Other Ways -->
+                <div class="col-lg-8 d-flex flex-column gap-4">
+                    <!-- Form Card -->
+                    <div class="contact-card p-5 border-0 shadow-lg h-auto">
+                        <div class="d-flex align-items-center justify-content-between mb-5">
+                            <div>
+                                <h3 class="fw-bold mb-1">Send us a Message</h3>
+                                <p class="text-muted mb-0">Fill out the form below and we'll get back to you.</p>
+                            </div>
+                            <div class="d-none d-md-block">
+                                <i class="fas fa-paper-plane fa-3x text-primary opacity-25"></i>
+                            </div>
+                        </div>
+                        
+                        <form id="contactForm" class="needs-validation" novalidate>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control bg-light border-0" id="contactName" placeholder="Your Name" required>
+                                        <label for="contactName">Full Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control bg-light border-0" id="contactEmail" placeholder="name@example.com" required>
+                                        <label for="contactEmail">Email Address</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="tel" class="form-control bg-light border-0" id="contactPhone" placeholder="Phone">
+                                        <label for="contactPhone">Phone Number (Optional)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select bg-light border-0" id="contactSubject" required>
+                                            <option value="" selected disabled>Select a subject...</option>
+                                            <option value="general">General Inquiry</option>
+                                            <option value="support">Technical Support</option>
+                                            <option value="registration">Registration Help</option>
+                                            <option value="partnership">Partnership Opportunity</option>
+                                        </select>
+                                        <label for="contactSubject">Subject</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control bg-light border-0" id="contactMessage" placeholder="Leave a comment here" style="height: 150px" required></textarea>
+                                        <label for="contactMessage">Your Message</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="contactConsent" required>
+                                        <label class="form-check-label text-muted small" for="contactConsent">
+                                            I agree to the processing of my personal data for the purpose of responding to this inquiry.
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill w-100 w-md-auto">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="success-message d-none text-center py-5" id="successMessage">
+                            <div class="mb-4">
+                                <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-check fa-2x"></i>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold text-success mb-3">Message Sent!</h3>
+                            <p class="text-muted mb-4 lead">Thank you for reaching out. We have received your message and will respond within 24-48 hours.</p>
+                            <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="resetForm()">Send Another Message</button>
+                        </div>
+                    </div>
+
+                    <!-- Other Ways to Connect Card -->
+                    <div class="contact-card p-4 border-0 shadow-sm flex-grow-1 d-flex align-items-center">
+                        <div class="row g-4 w-100 m-0">
+                            <div class="col-md-4 text-center border-end border-light position-relative">
+                                <div class="mb-2 text-danger">
+                                    <i class="fas fa-ambulance fa-2x"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1">Emergency</h6>
+                                <a href="tel:+256700000001" class="btn btn-link text-danger text-decoration-none p-0 small fw-medium stretched-link">Call Line <i class="fas fa-arrow-right ms-1"></i></a>
+                            </div>
+                            <div class="col-md-4 text-center border-end border-light">
+                                <div class="mb-2 text-info">
+                                    <i class="fas fa-comments fa-2x"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1">Live Chat</h6>
+                                <span class="text-muted small">Coming Soon</span>
+                            </div>
+                            <div class="col-md-4 text-center position-relative">
+                                <div class="mb-2 text-primary">
+                                    <i class="fas fa-book fa-2x"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1">Docs</h6>
+                                <a href="/api-docs.html" class="btn btn-link text-primary text-decoration-none p-0 small fw-medium stretched-link">View KB <i class="fas fa-arrow-right ms-1"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer py-4" style="background: #1a1a2e; color: rgba(255,255,255,0.7);">
+        <div class="container text-center">
+            <div class="mb-3 d-flex justify-content-center align-items-center flex-wrap gap-3">
+                <a href="/index.html" class="text-decoration-none text-white fw-bold"><i class="fas fa-heartbeat text-danger me-1"></i>HIE Uganda</a>
+                <span class="d-none d-sm-inline">|</span>
+                <a href="/index.html#features" class="text-reset text-decoration-none small">Features</a>
+                <a href="/faq.html" class="text-reset text-decoration-none small">FAQ</a>
+                <a href="/contact.html" class="text-reset text-decoration-none small">Contact</a>
+                <a href="/login.html" class="text-reset text-decoration-none small">Login</a>
+            </div>
+            <p class="mb-0 small">&copy; 2026 Health Information Exchange System - Uganda. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- External JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <script>
+        // Check auth state
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('hie_token');
+            const userStr = localStorage.getItem('hie_user');
+            
+            if (token && userStr) {
+                const user = JSON.parse(userStr);
+                const authButtons = document.getElementById('authButtons');
+                const userMenu = document.getElementById('userMenu');
+                const dashboardLink = document.getElementById('dashboardLink');
+                
+                if (authButtons) authButtons.style.display = 'none';
+                if (userMenu) userMenu.style.display = 'flex';
+                
+                if (dashboardLink) {
+                    if (user.role === 'admin') {
+                        dashboardLink.href = '/admin';
+                    } else {
+                        dashboardLink.href = '/dashboard.html';
+                    }
+                }
+            }
+            
+            // Logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('hie_token');
+                    localStorage.removeItem('hie_user');
+                    window.location.href = '/index.html';
+                });
+            }
+        });
+
+        // Contact form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulate form submission
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(function() {
+                form.style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+            }, 1500);
+        });
+        
+        function resetForm() {
+            const form = document.getElementById('contactForm');
+            form.reset();
+            form.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Message';
+            submitBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
