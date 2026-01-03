@@ -3,20 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healthcare Information Exchange</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
-    <script>
-        window.location.href = '/login.html';
-    </script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Centralized Health Information Exchange System - Transforming Healthcare in Uganda">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    
+    <title>Health Information Exchange System - Uganda</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/landing.css">
 </head>
-<body class="bg-light">
-    <div class="container text-center">
-        <div class="spinner-border text-primary mb-3" role="status">
-            <span class="visually-hidden">Loading...</span>
+<body id="home">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-heartbeat text-success"></i>HIE Uganda
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#case-study">Case Study</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="faq.html">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item" id="adminNavItem" style="display: none;">
+                        <a class="nav-link" href="/admin"><i class="fas fa-shield-alt me-1"></i>Admin</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav gap-2" id="authButtons">
+                    <li class="nav-item">
+                        <a class="btn btn-login" href="/login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-signup" href="/register.html">Sign Up</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav gap-2 align-items-center" id="userMenu" style="display: none;">
+                    <li class="nav-item">
+                        <a class="btn btn-primary btn-sm rounded-pill px-3" href="/dashboard.html" id="dashboardLink">
+                            <i class="fas fa-columns me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="#" id="logoutBtnIndex" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <p class="lead">Redirecting to login page...</p>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1 class="hero-title">Transforming Healthcare Through Connected Data</h1>
+                    <p class="hero-subtitle">
+                        The Centralized Health Information Exchange System connects healthcare providers 
+                        across Uganda, enabling seamless sharing of patient information for better 
+                        diagnosis, treatment, and health outcomes.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="/register.html" class="btn btn-hero-primary">
+                            <i class="fas fa-user-plus me-2"></i>Get Started
+                        </a>
+                        <a href="#case-study" class="btn btn-hero-secondary">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 hero-image-container d-none d-lg-block">
+                    <div class="hero-image">
+                        <div class="floating-card floating-card-1">
+                            <i class="fas fa-shield-virus text-success fa-2x mb-2"></i>
+                            <h6 class="mb-0">Secure & Compliant</h6>
+                        </div>
+                        <div class="floating-card floating-card-2">
+                            <i class="fas fa-network-wired text-primary fa-2x mb-2"></i>
+                            <h6 class="mb-0">Fully Connected</h6>
+                        </div>
+                        <div class="text-center p-5 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25">
+                            <i class="fas fa-hospital-user text-white" style="font-size: 12rem; opacity: 0.9;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Uganda Stripe -->
+    <div class="uganda-stripe"></div>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Why Health Information Exchange?</h2>
+                <p class="section-subtitle">Empowering healthcare providers with the tools they need to deliver superior patient care through seamless data integration.</p>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h4>Real-Time Data Sharing</h4>
+                    <p>Instantly share patient records, test results, and medical histories between healthcare facilities across the country.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h4>Patient Privacy</h4>
+                    <p>Advanced encryption and role-based access ensure patient data remains confidential and protected at all times.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <h4>Complete Medical History</h4>
+                    <p>Access comprehensive patient records including allergies, medications, past treatments, and diagnostic reports.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>Reduced Wait Times</h4>
+                    <p>Eliminate redundant tests and paperwork, allowing healthcare providers to focus on patient care.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <h4>Emergency Readiness</h4>
+                    <p>Critical patient information available instantly during emergencies, potentially saving lives.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Data-Driven Insights</h4>
+                    <p>Generate reports and analytics to improve healthcare delivery and inform public health decisions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Study Section -->
+    <section class="case-study-section" id="case-study">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <div class="uganda-badge">
+                        <span style="font-size: 1.2rem;">🇺🇬</span>
+                        <span class="ms-2">Republic of Uganda</span>
+                    </div>
+                    <h2 class="section-title text-start mb-3">Healthcare Challenges in Uganda</h2>
+                    <p class="text-muted mb-4 lead">
+                        Uganda's healthcare system serves over 45 million people across diverse regions. The fragmented nature of health records creates significant barriers to quality care.
+                    </p>
+                    
+                    <h5 class="mb-3 fw-bold"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Key Challenges</h5>
+                    <ul class="challenge-list mb-4">
+                        <li>
+                            <i class="fas fa-times-circle"></i>
+                            <div>
+                                <strong>Fragmented Records</strong><br>
+                                <small class="text-muted">Patient data scattered across paper files and isolated digital systems</small>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times-circle"></i>
+                            <div>
+                                <strong>Limited Interoperability</strong><br>
+                                <small class="text-muted">Different hospitals using incompatible record systems</small>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times-circle"></i>
+                            <div>
+                                <strong>Duplicate Testing</strong><br>
+                                <small class="text-muted">Patients undergoing repeated tests due to unavailable prior results</small>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-times-circle"></i>
+                            <div>
+                                <strong>Referral Gaps</strong><br>
+                                <small class="text-muted">Critical information lost during patient transfers between facilities</small>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="45" data-suffix="M+">0M+</span>
+                            <span class="stat-label">Population Served</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="6000" data-suffix="+">0+</span>
+                            <span class="stat-label">Health Facilities</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="134" data-suffix="">0</span>
+                            <span class="stat-label">Districts</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="80" data-suffix="%">0%</span>
+                            <span class="stat-label">Rural Population</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-light rounded-4 border">
+                        <h5 class="text-success mb-3 fw-bold"><i class="fas fa-check-circle me-2"></i>Our Solution</h5>
+                        <ul class="challenge-list solution-list mb-0">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Centralized patient registry accessible nationwide</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Standardized data formats for seamless exchange</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Offline-capable for areas with limited connectivity</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Role-based access for different healthcare workers</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works-section" id="how-it-works" style="background: var(--bg-secondary); padding: 3rem 0;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-3 text-center text-lg-start mb-4 mb-lg-0">
+                    <h3 class="fw-bold mb-2">How It Works</h3>
+                    <p class="text-muted small mb-0">Simple steps to better healthcare coordination</p>
+                </div>
+                <div class="col-lg-9">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center bg-white p-3 rounded-3 shadow-sm h-100 border">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 fw-bold d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">1</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Register</h6>
+                                    <p class="text-muted small mb-0 lh-sm">Create secure provider account</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center bg-white p-3 rounded-3 shadow-sm h-100 border">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 fw-bold d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">2</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Add Data</h6>
+                                    <p class="text-muted small mb-0 lh-sm">Input patient records & history</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center bg-white p-3 rounded-3 shadow-sm h-100 border">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 fw-bold d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">3</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Connect</h6>
+                                    <p class="text-muted small mb-0 lh-sm">Share & access securely</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5">
+        <div class="container">
+            <div class="cta-card rounded-4 p-5 position-relative overflow-hidden" style="background: var(--hero-gradient);">
+                <!-- Decorative Elements -->
+                <div class="position-absolute top-0 end-0 bg-white opacity-10 rounded-circle" style="width: 400px; height: 400px; transform: translate(30%, -30%);"></div>
+                <div class="position-absolute bottom-0 start-0 bg-warning opacity-10 rounded-circle" style="width: 300px; height: 300px; transform: translate(-30%, 30%);"></div>
+                
+                <div class="row align-items-center position-relative z-1">
+                    <div class="col-lg-8 text-center text-lg-start mb-4 mb-lg-0">
+                        <h2 class="fw-bold text-white mb-2">Ready to Transform Healthcare?</h2>
+                        <p class="text-white text-opacity-90 mb-0 lead">Join the network of healthcare providers committed to better patient outcomes.</p>
+                    </div>
+                    <div class="col-lg-4 text-center text-lg-end">
+                        <a href="/register.html" class="btn btn-light text-primary fw-bold px-5 py-3 rounded-pill shadow-lg hover-lift">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer py-4" style="background: #1a1a2e; color: rgba(255,255,255,0.7);">
+        <div class="container text-center">
+            <div class="mb-3 d-flex justify-content-center align-items-center flex-wrap gap-3">
+                <a href="/index.html" class="text-decoration-none text-white fw-bold"><i class="fas fa-heartbeat text-danger me-1"></i>HIE Uganda</a>
+                <span class="d-none d-sm-inline">|</span>
+                <a href="#features" class="text-reset text-decoration-none small">Features</a>
+                <a href="faq.html" class="text-reset text-decoration-none small">FAQ</a>
+                <a href="contact.html" class="text-reset text-decoration-none small">Contact</a>
+                <a href="/login.html" class="text-reset text-decoration-none small">Login</a>
+            </div>
+            <p class="mb-0 small">&copy; 2026 Health Information Exchange System - Uganda. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- External JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 2px 30px rgba(0,0,0,0.15)';
+            } else {
+                navbar.style.boxShadow = '0 2px 20px rgba(0,0,0,0.1)';
+            }
+        });
+
+        // Check if user is logged in and update navbar
+        (function() {
+            const TOKEN_KEY = 'hie_token';
+            const USER_KEY = 'hie_user';
+            
+            const token = localStorage.getItem(TOKEN_KEY);
+            const user = JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+            
+            if (token && user) {
+                // User is logged in - show user menu
+                document.getElementById('authButtons').style.display = 'none';
+                document.getElementById('userMenu').style.display = 'flex';
+                                // Set dashboard link
+                const dashboardLink = document.getElementById('dashboardLink');
+                if(dashboardLink) {
+                    if (user.role === 'admin') {
+                        dashboardLink.href = '/admin';
+                    } else {
+                        dashboardLink.href = '/dashboard.html';
+                    }
+                }
+                                // Show admin link for admins
+                if (user.role === 'admin') {
+                    document.getElementById('adminNavItem').style.display = 'block';
+                }
+                
+                // Handle logout
+                document.getElementById('logoutBtnIndex').addEventListener('click', function() {
+                    localStorage.removeItem(TOKEN_KEY);
+                    localStorage.removeItem(USER_KEY);
+                    window.location.reload();
+                });
+            }
+        })();
+
+        // Number Autocount Animation
+        (function() {
+            const stats = document.querySelectorAll('.stat-number');
+            const statSection = document.querySelector('.stat-grid');
+            let isAnimating = false;
+
+            function animateStats() {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                stats.forEach(stat => {
+                    const target = +stat.getAttribute('data-target');
+                    const suffix = stat.getAttribute('data-suffix') || '';
+                    const duration = 2000; // 2 seconds
+                    const frameDuration = 1000 / 60;
+                    const totalFrames = Math.round(duration / frameDuration);
+                    const easeOutQuad = t => t * (2 - t);
+                    
+                    let frame = 0;
+                    
+                    const counter = setInterval(() => {
+                        frame++;
+                        const progress = easeOutQuad(frame / totalFrames);
+                        const currentCount = Math.round(target * progress);
+                        
+                        if (target >= 1000) {
+                            stat.innerText = currentCount.toLocaleString() + suffix;
+                        } else {
+                            stat.innerText = currentCount + suffix;
+                        }
+                        
+                        if (frame === totalFrames) {
+                            clearInterval(counter);
+                            if (stat === stats[stats.length - 1]) {
+                                isAnimating = false;
+                            }
+                        }
+                    }, frameDuration);
+                });
+            }
+
+            // Trigger on Scroll
+            if (statSection) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            animateStats();
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(statSection);
+            }
+
+            // Trigger every 30 seconds
+            setInterval(() => {
+                // Only animate if the section is currently visible in the viewport
+                if (statSection) {
+                    const rect = statSection.getBoundingClientRect();
+                    const isVisible = (
+                        rect.top >= 0 &&
+                        rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+                    
+                    if (isVisible) {
+                        animateStats();
+                    }
+                }
+            }, 30000);
+        })();
+    </script>
 </body>
 </html>
