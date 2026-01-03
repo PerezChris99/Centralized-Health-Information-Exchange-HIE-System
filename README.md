@@ -4,22 +4,45 @@
 The Centralized Health Information Exchange System is a web-based API that consolidates patient records from multiple healthcare facilities, enabling real-time data sharing and improved decision-making.
 
 ## Features
-- Consolidate patient records from multiple healthcare facilities
-- Real-time data sharing using Socket.IO
-- CRUD operations for patients, appointments, medical records, and users
-- JWT-based authentication and role-based authorization
-- Audit logging for compliance
-- Password reset via email
-- Simple HTML dashboard for real-time updates
+
+### Core Functionality
+- **Centralized Patient Registry:** Consolidate patient records from multiple healthcare facilities into a single, secure source of truth.
+- **Real-time Data Sharing:** Instant updates across connected clients using Socket.IO for critical alerts and dashboard refreshes.
+- **Comprehensive CRUD Operations:** Full management of Patients, Appointments, Medical Records, and User accounts.
+- **Security First:** 
+  - JWT-based authentication with secure token management.
+  - Role-based access control (RBAC) for Admins, Doctors, and Nurses.
+  - Comprehensive audit logging for all system actions to ensure compliance.
+
+### Frontend Experience (New!)
+- **Modern Landing Page:** 
+  - Responsive design with a polished hero section.
+  - Auto-counting statistics animation to showcase system scale.
+  - Optimized "How It Works" and "Call to Action" sections for better user engagement.
+- **Interactive Contact Portal:**
+  - Integrated Google Maps for location services.
+  - Smart contact forms with validation and feedback.
+  - Quick access to emergency contacts and documentation.
+- **Admin Dashboard:**
+  - Real-time activity feeds.
+  - Visual statistics and system health monitoring.
+  - User management interface.
 
 ## Technologies Used
-- Python 3.10+
-- Flask (Web Framework)
-- SQLAlchemy (ORM)
-- SQLite (Database - can be switched to PostgreSQL)
-- Flask-SocketIO (Real-time notifications)
-- Flask-JWT-Extended (Authentication)
-- HTML/CSS/JavaScript (Frontend)
+
+### Backend
+- **Python 3.13+**: Core programming language.
+- **Flask**: Lightweight and flexible web framework.
+- **SQLAlchemy**: Powerful ORM for database interactions.
+- **Flask-SocketIO**: Real-time bidirectional event-based communication.
+- **Flask-JWT-Extended**: Secure JSON Web Token authentication.
+- **SQLite**: Default database (easily scalable to PostgreSQL).
+
+### Frontend
+- **HTML5 & CSS3**: Semantic markup and modern styling variables.
+- **Bootstrap 5**: Responsive grid system and components.
+- **JavaScript (ES6+)**: Dynamic client-side logic and DOM manipulation.
+- **FontAwesome**: Comprehensive icon library.
 
 ## Getting Started
 
