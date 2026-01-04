@@ -339,6 +339,7 @@
             state.user = null;
             localStorage.removeItem(CONFIG.TOKEN_KEY);
             localStorage.removeItem(CONFIG.USER_KEY);
+            localStorage.removeItem('hie_patient');
         },
 
         /**
@@ -348,7 +349,19 @@
             const response = await api.login(email, password);
             
             if (response.success && response.token) {
-                this.saveAuth(response.token, response.user);
+                // Ensure patient_id is included in user data for patient users
+                const userData = response.user;
+                if (response.patient && response.patient.id) {
+                    userData.patient_id = response.patient.id;
+                    userData.patientId = response.patient.id;
+                }
+                this.saveAuth(response.token, userData);
+                
+                // Also store the full patient data separately for quick access
+                if (response.patient) {
+                    localStorage.setItem('hie_patient', JSON.stringify(response.patient));
+                }
+                
                 return true;
             }
             
@@ -876,7 +889,6 @@
 
             list.innerHTML = this.notifications.map(n => {
                 const timeAgo = this.getTimeAgo(n.time);
-                const iconClass = this.getIconClass(n.type);
                 const icon = this.getIcon(n.type);
 
                 return `
@@ -1954,6 +1966,7 @@
                                     <h6 class="text-primary-color border-bottom pb-1 mb-2 print-section-title" style="font-size: 0.95rem;">
                                         <i class="fas fa-address-card me-1 d-print-none"></i>Contact Details
                                     </h6>
+                                    <div class="detail-row py-1"><span class="detail-label" style="font-size: 0.85rem;">Email</span><span class="detail-value" style="font-size: 0.85rem;">${utils.escapeHtml(patient.email || 'N/A')}</span></div>
                                     <div class="detail-row py-1"><span class="detail-label" style="font-size: 0.85rem;">Phone</span><span class="detail-value" style="font-size: 0.85rem;">${utils.escapeHtml(patient.contactNumber || 'N/A')}</span></div>
                                     <div class="detail-row py-1"><span class="detail-label" style="font-size: 0.85rem;">District</span><span class="detail-value" style="font-size: 0.85rem;">${utils.escapeHtml(patient.district || 'N/A')}</span></div>
                                     <div class="detail-row py-1"><span class="detail-label" style="font-size: 0.85rem;">Village</span><span class="detail-value" style="font-size: 0.85rem;">${utils.escapeHtml(patient.village || 'N/A')}</span></div>
@@ -2295,7 +2308,8 @@
         // Page-specific initialization
         const path = window.location.pathname;
 
-        if (path.includes('dashboard')) {
+        // Provider dashboard only (not patient-dashboard)
+        if (path.includes('dashboard.html') && !path.includes('patient-dashboard')) {
             // Block admins from accessing the provider dashboard
             if (!auth.requireNonAdmin()) {
                 return; // Will redirect to /admin

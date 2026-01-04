@@ -140,6 +140,8 @@ const AuthModule = {
             
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.innerHTML;
+            const ninSection = document.getElementById('ninSection');
+            const ninInput = document.getElementById('nin');
             
             // Validate passwords match
             const password = document.getElementById('password').value;
@@ -167,9 +169,21 @@ const AuthModule = {
                 password: password
             };
             
+            // Include NIN if provided
+            if (ninInput && ninInput.value.trim()) {
+                formData.nin = ninInput.value.trim();
+            }
+            
             // Validate required fields
             if (!formData.firstName || !formData.lastName || !formData.dateOfBirth || !formData.gender || !formData.email) {
                 HIE.notifications.error('Please fill in all required fields');
+                return;
+            }
+            
+            // Check if NIN is required but not provided
+            if (ninSection && ninSection.style.display !== 'none' && !formData.nin) {
+                HIE.notifications.error('Please enter your National ID Number (NIN) to verify your identity');
+                ninInput.focus();
                 return;
             }
             
@@ -189,10 +203,36 @@ const AuthModule = {
                 const result = await response.json();
                 
                 if (result.success) {
-                    HIE.notifications.success('Registration successful! Redirecting to login...');
+                    // Check if existing patient record was linked
+                    if (result.linked_existing && result.patient_name) {
+                        HIE.notifications.success(`Welcome ${result.patient_name}! Your existing patient record has been linked to your new account. Redirecting to login...`);
+                    } else {
+                        HIE.notifications.success('Registration successful! Redirecting to login...');
+                    }
                     setTimeout(() => {
                         window.location.href = '/login.html';
-                    }, 2000);
+                    }, 2500);
+                } else if (result.requires_nin) {
+                    // Multiple records found - show NIN input
+                    if (ninSection) {
+                        ninSection.style.display = 'block';
+                        const ninMessage = document.getElementById('ninMessage');
+                        if (ninMessage) {
+                            ninMessage.textContent = `We found ${result.match_count} patient records matching your information. Please enter your National ID Number (NIN) to verify which record is yours.`;
+                        }
+                        ninInput.required = true;
+                        ninInput.focus();
+                        // Scroll to NIN section
+                        ninSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    HIE.notifications.warning('Additional verification required. Please enter your NIN.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                } else if (result.data_mismatch) {
+                    // Data doesn't match any record
+                    HIE.notifications.error(result.error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
                 } else {
                     throw new Error(result.error || 'Registration failed');
                 }
