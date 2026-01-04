@@ -2,5 +2,9 @@
   {
     "type": "sqlite",
     "path": "d:\\NEW PROJECTS\\Centralized Health Information Exchange System\\instance\\health_exchange.db"
+  },
+  {
+    "type": "sqlite",
+    "path": "d:\\NEW PROJECTS\\Centralized Health Information Exchange System\\instance\\hie.db"
   }
 ]

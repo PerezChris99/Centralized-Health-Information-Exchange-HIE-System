@@ -18,6 +18,24 @@ class Patient(db.Model):
     email = db.Column(db.String(120), nullable=True)
     address = db.Column(db.Text, nullable=True)
     
+    # Link to user account for patient login
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, unique=True)
+    
+    # Ugandan Specific Fields
+    nin = db.Column(db.String(20), nullable=True)  # National ID Number
+    village = db.Column(db.String(100), nullable=True)
+    district = db.Column(db.String(100), nullable=True)
+    
+    # Next of Kin
+    next_of_kin_name = db.Column(db.String(100), nullable=True)
+    next_of_kin_contact = db.Column(db.String(20), nullable=True)
+    next_of_kin_relationship = db.Column(db.String(50), nullable=True)
+
+    # Medical Specifics
+    blood_group = db.Column(db.String(5), nullable=True)  # A+, O-, etc.
+    genotype = db.Column(db.String(5), nullable=True)     # AA, AS, SS
+    chronic_conditions = db.Column(db.JSON, default=list) # Hypertension, Diabetes, etc.
+
     # Physical characteristics
     height = db.Column(db.Float, nullable=True)  # in cm
     weight = db.Column(db.Float, nullable=True)  # in kg
@@ -42,6 +60,7 @@ class Patient(db.Model):
     # Relationships
     appointments = db.relationship('Appointment', back_populates='patient', lazy='dynamic', cascade='all, delete-orphan')
     medical_records = db.relationship('MedicalRecord', back_populates='patient', lazy='dynamic', cascade='all, delete-orphan')
+    user_account = db.relationship('User', backref='patient_profile', foreign_keys=[user_id])
     
     @property
     def bmi(self):
@@ -77,6 +96,19 @@ class Patient(db.Model):
             'contactNumber': self.contact_number,
             'email': self.email,
             'address': self.address,
+            # Ugandan Specific
+            'nin': self.nin,
+            'village': self.village,
+            'district': self.district,
+            # Next of Kin
+            'nextOfKinName': self.next_of_kin_name,
+            'nextOfKinContact': self.next_of_kin_contact,
+            'nextOfKinRelationship': self.next_of_kin_relationship,
+            # Medical
+            'bloodGroup': self.blood_group,
+            'genotype': self.genotype,
+            'chronicConditions': self.chronic_conditions or [],
+            # Physical
             'height': self.height,
             'weight': self.weight,
             'bmi': self.bmi,

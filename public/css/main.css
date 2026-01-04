@@ -38,18 +38,18 @@
     --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 4px 8px -2px rgba(0, 0, 0, 0.1);
     
-    /* Compact Spacing */
-    --spacing-xs: 0.2rem;
-    --spacing-sm: 0.35rem;
-    --spacing-md: 0.6rem;
-    --spacing-lg: 0.9rem;
-    --spacing-xl: 1.25rem;
+    /* Spacing - Standard */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2.5rem;
     
     /* Border Radius */
-    --radius-sm: 0.2rem;
-    --radius-md: 0.35rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 0.75rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
     
     /* Transitions */
     --transition-fast: 150ms ease;
@@ -66,7 +66,7 @@
 }
 
 html {
-    font-size: 14.5px;
+    font-size: 14px;
     scroll-behavior: smooth;
 }
 
@@ -74,30 +74,30 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    line-height: 1.45;
+    line-height: 1.5;
     min-height: 100vh;
 }
 
 /* ========================================
-   Typography - Compact
+   Typography
    ======================================== */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    line-height: 1.25;
+    font-weight: 700;
+    line-height: 1.2;
     margin-bottom: var(--spacing-sm);
     color: var(--text-primary);
 }
 
-h1 { font-size: 1.6rem; }
-h2 { font-size: 1.35rem; }
-h3 { font-size: 1.15rem; }
-h4 { font-size: 1.05rem; }
-h5 { font-size: 0.95rem; }
-h6 { font-size: 0.9rem; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1rem; }
 
 p {
-    margin-bottom: var(--spacing-sm);
-    font-size: 0.9rem;
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
 }
 
 a {
@@ -239,52 +239,150 @@ a:hover {
     background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
 }
 
-/* Patient Card - Compact Grid */
+/* Patient Card - Sleek */
 .patient-card {
     background: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
-    transition: all var(--transition-fast);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.patient-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-color);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
 }
 
 .patient-card:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-light);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
-/* Stats Card - Compact */
+.patient-card:hover::before {
+    opacity: 1;
+}
+
+.patient-card .card-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.patient-card .patient-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.patient-card .patient-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.patient-card .patient-actions {
+    margin-top: auto;
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--bg-secondary);
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Appointment Card - Sleek */
+.appointment-card {
+    background: var(--bg-white);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid var(--primary-color);
+}
+
+.appointment-card:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow-md);
+}
+
+.appointment-time {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.appointment-status {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-weight: 600;
+}
+
+.status-scheduled { background: #ebf8ff; color: #3182ce; }
+.status-completed { background: #f0fff4; color: #38a169; }
+.status-cancelled { background: #fff5f5; color: #e53e3e; }
+
+/* Stats Card - Modern */
 .stats-card {
     background: var(--bg-white);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md);
-    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    border: none;
+    box-shadow: var(--shadow-sm);
     text-align: center;
+    transition: transform var(--transition-normal);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
 }
 
 .stats-card .stats-icon {
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
     background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-    border-radius: 50%;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--bg-white);
-    font-size: 0.9rem;
-    margin: 0 auto var(--spacing-sm);
+    font-size: 1.25rem;
+    margin: 0 auto var(--spacing-md);
+    box-shadow: 0 4px 6px rgba(56, 178, 172, 0.3);
 }
 
 .stats-card .stats-number {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 800;
     color: var(--text-primary);
+    margin-bottom: 0.25rem;
 }
 
 .stats-card .stats-label {
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* ========================================
@@ -904,4 +1002,183 @@ a:hover {
     align-items: center;
     justify-content: center;
     border: 4px solid var(--border-color);
+}
+
+/* ========================================
+   PDF Generation Helpers
+   ======================================== */
+.pdf-mode .d-print-block {
+    display: block !important;
+}
+.pdf-mode .d-print-none {
+    display: none !important;
+}
+
+/* ========================================
+   Print Styles - Professional Document Format
+   ======================================== */
+@media print {
+    /* Reset and Hide Basics */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Hide UI Elements */
+    .navbar, 
+    .btn, 
+    .modal-header .btn-close, 
+    .modal-footer,
+    .modal-backdrop,
+    .d-print-none {
+        display: none !important;
+    }
+
+    /* Setup Page */
+    @page {
+        size: A4;
+        margin: 2cm;
+    }
+
+    body {
+        background: white !important;
+        font-family: 'Times New Roman', Times, serif !important; /* Serif for documents */
+        font-size: 12pt !important;
+        line-height: 1.5 !important;
+        color: black !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Target the Patient Record Wrapper */
+    #viewPatientModal,
+    #viewPatientModal .modal-dialog,
+    #viewPatientModal .modal-content,
+    #viewPatientModal .modal-body,
+    .patient-record-print-wrapper,
+    .patient-record-print-wrapper * {
+        visibility: visible;
+    }
+
+    /* Reset Modal Positioning for Print */
+    #viewPatientModal {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: white !important;
+    }
+
+    .modal-dialog {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .modal-content {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .modal-body {
+        padding: 0 !important;
+    }
+
+    /* Document Layout */
+    .patient-record-print-wrapper {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    /* Header Styling */
+    .print-header {
+        margin-bottom: 30px;
+        border-bottom: 2px solid #000 !important;
+    }
+
+    .print-logo i {
+        color: #000 !important; /* Black logo for print */
+    }
+
+    /* Typography Overrides */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Arial', sans-serif !important; /* Headings can be sans-serif */
+        color: #000 !important;
+        font-weight: bold !important;
+    }
+
+    h2 { font-size: 24pt !important; }
+    h3 { font-size: 18pt !important; }
+    h4 { font-size: 14pt !important; }
+    h6 { font-size: 12pt !important; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Section Styling */
+    .print-section {
+        border: 1px solid #ddd !important;
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+        background: transparent !important;
+        page-break-inside: avoid;
+    }
+
+    .print-section-title {
+        border-bottom: 1px solid #000 !important;
+        padding-bottom: 5px !important;
+        margin-bottom: 10px !important;
+        color: #000 !important;
+    }
+
+    /* Grid Layout for Print */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+
+    .print-col-6 {
+        width: 50% !important;
+        float: left !important;
+        padding: 0 10px !important;
+    }
+
+    /* Detail Rows */
+    .detail-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        border-bottom: 1px dotted #ccc !important;
+        padding: 4px 0 !important;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none !important;
+    }
+
+    .detail-label {
+        font-weight: bold !important;
+        color: #333 !important;
+    }
+
+    .detail-value {
+        color: #000 !important;
+    }
+
+    /* Badges to Text */
+    .badge {
+        border: 1px solid #000 !important;
+        background: transparent !important;
+        color: #000 !important;
+        font-weight: normal !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+    }
+
+    /* Images */
+    img {
+        filter: grayscale(100%) !important; /* Print photos in B&W usually looks better on docs */
+    }
 }

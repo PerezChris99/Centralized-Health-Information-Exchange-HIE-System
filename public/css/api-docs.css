@@ -1,0 +1,91 @@
+/* ==========================================================================
+   API Documentation Styles
+   ========================================================================== */
+
+/* Compact navbar overrides */
+.navbar-medical {
+    padding: 0.3rem 0.5rem;
+}
+
+.api-docs .navbar-brand {
+    font-size: 0.9rem;
+}
+
+.api-docs .nav-link {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem !important;
+}
+
+.api-docs .navbar .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+}
+
+/* API docs compact typography */
+.api-docs h3 {
+    font-size: 0.95rem;
+}
+
+.api-docs h4 {
+    font-size: 0.85rem;
+}
+
+.api-docs p,
+.api-docs li {
+    font-size: 0.75rem;
+}
+
+.api-docs code {
+    font-size: 0.7rem;
+}
+
+.api-docs pre {
+    font-size: 0.65rem;
+    padding: 0.5rem;
+}
+
+.api-docs .badge {
+    font-size: 0.6rem;
+}
+
+/* HTTP Method Badges */
+.method-get,
+.method-post,
+.method-put,
+.method-delete {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 0.5rem;
+}
+
+.method-get {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.method-post {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.method-put {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.method-delete {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* API Endpoint Code */
+.api-endpoint {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}

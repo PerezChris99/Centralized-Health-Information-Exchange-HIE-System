@@ -320,6 +320,72 @@ def get_audit_logs():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@admin_bp.route('/logs/patient-activities', methods=['GET'])
+@admin_required
+def get_patient_activities():
+    """Get patient-specific activities for admin monitoring"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 50, type=int)
+        patient_id = request.args.get('patient_id', type=int)
+        date_from = request.args.get('date_from', type=str)
+        date_to = request.args.get('date_to', type=str)
+        
+        # Filter for patient-related activities
+        query = AuditLog.query.filter(
+            AuditLog.resource_type.like('patient%')
+        )
+        
+        # Join with User to get only patient users
+        query = query.join(User, AuditLog.user_id == User.id).filter(
+            User.role == 'patient'
+        )
+        
+        if patient_id:
+            # Get the patient's user_id
+            patient = Patient.query.get(patient_id)
+            if patient and patient.user_id:
+                query = query.filter(AuditLog.user_id == patient.user_id)
+        
+        if date_from:
+            query = query.filter(AuditLog.timestamp >= datetime.fromisoformat(date_from))
+        if date_to:
+            query = query.filter(AuditLog.timestamp <= datetime.fromisoformat(date_to))
+        
+        pagination = query.order_by(desc(AuditLog.timestamp)).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        # Enrich data with patient info
+        activities = []
+        for log in pagination.items:
+            log_dict = log.to_dict()
+            # Get patient info
+            patient = Patient.query.filter_by(user_id=log.user_id).first()
+            if patient:
+                log_dict['patient'] = {
+                    'id': patient.id,
+                    'name': f"{patient.first_name} {patient.last_name}",
+                    'email': patient.email
+                }
+            activities.append(log_dict)
+        
+        return jsonify({
+            'success': True,
+            'data': activities,
+            'pagination': {
+                'page': page,
+                'perPage': per_page,
+                'total': pagination.total,
+                'pages': pagination.pages,
+                'hasNext': pagination.has_next,
+                'hasPrev': pagination.has_prev
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @admin_bp.route('/logs/export', methods=['GET'])
 @admin_required
 def export_audit_logs():
