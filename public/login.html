@@ -22,78 +22,7 @@
     
     <!-- App CSS -->
     <link rel="stylesheet" href="css/main.css">
-    <style>
-        .auth-navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-            padding: 0.5rem 0;
-        }
-        .auth-navbar .navbar-brand {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #0d6efd !important;
-        }
-        .auth-navbar .nav-link {
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: #333 !important;
-            padding: 0.4rem 0.75rem;
-        }
-        .auth-navbar .nav-link:hover {
-            color: #0d6efd !important;
-        }
-        .auth-navbar .btn-signup {
-            background: #0d6efd;
-            color: white;
-            border-radius: 18px;
-            padding: 0.35rem 1rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .auth-navbar .btn-signup:hover {
-            background: #0a58ca;
-        }
-        body.bg-primary-light {
-            padding-top: 60px;
-        }
-        .auth-card {
-            max-width: 380px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-        .auth-card .medical-icon {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-            margin: 0 auto 1rem;
-        }
-        .auth-card h2 {
-            font-size: 1.3rem;
-        }
-        .auth-card p {
-            font-size: 0.9rem;
-        }
-        .auth-card .form-label {
-            font-size: 0.9rem;
-            margin-bottom: 0.3rem;
-        }
-        .auth-card .form-control {
-            font-size: 0.95rem;
-            padding: 0.5rem 0.65rem;
-        }
-        .auth-card .btn {
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem;
-        }
-        .auth-card .form-check-label,
-        .auth-card .small {
-            font-size: 0.85rem;
-        }
-        .container-centered {
-            padding: 1.5rem 0;
-        }
-    </style>
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body class="bg-primary-light">
     <!-- Navigation -->
@@ -214,60 +143,12 @@
     
     <!-- App JS -->
     <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
     
     <!-- Page-specific JS -->
     <script>
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const password = document.getElementById('password');
-            const icon = this.querySelector('i');
-            
-            if (password.type === 'password') {
-                password.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                password.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
-
-        // Forgot password handler
-        document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            
-            if (!email) {
-                HIE.notifications.warning('Please enter your email address first');
-                document.getElementById('email').focus();
-                return;
-            }
-
-            HIE.api.forgotPassword(email)
-                .then(() => HIE.notifications.success('Password reset email sent!'))
-                .catch(err => HIE.notifications.error(err.message));
-        });
-
-        // Redirect if already logged in (validate token first)
-        (async function() {
-            if (HIE.auth.isAuthenticated()) {
-                try {
-                    // Validate token by making an API call
-                    await HIE.api.getPatients();
-                    // Redirect admin to admin dashboard
-                    const user = HIE.auth.getUser();
-                    if (user && user.role === 'admin') {
-                        window.location.href = '/admin';
-                    } else {
-                        window.location.href = '/dashboard.html';
-                    }
-                } catch (e) {
-                    // Token is invalid, clear it (don't use logout which redirects)
-                    HIE.auth.clearAuth();
-                }
-            }
-        })();
+        // Initialize login page
+        AuthModule.initLoginPage();
     </script>
 </body>
 </html>

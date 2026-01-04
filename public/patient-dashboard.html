@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Patient Dashboard - Health Information Exchange Uganda">
+    <title>Patient Dashboard - HIE Uganda</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/patient-dashboard.css?v=6">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/index.html" class="sidebar-brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div>
+                        <div class="brand-text">HIE Uganda</div>
+                        <div class="brand-sub">Patient Portal</div>
+                    </div>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <a class="nav-item active" data-section="overview">
+                        <i class="fas fa-th-large"></i>
+                        <span>Overview</span>
+                    </a>
+                    <a class="nav-item" data-section="appointments">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Appointments</span>
+                        <span class="nav-badge" id="navApptBadge">0</span>
+                    </a>
+                    <a class="nav-item" data-section="records">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Medical Records</span>
+                    </a>
+                    <a class="nav-item" data-section="profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>My Profile</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Quick Links</div>
+                    <a class="nav-item" href="/index.html">
+                        <i class="fas fa-home"></i>
+                        <span>Back to Home</span>
+                    </a>
+                    <a class="nav-item" href="/faq.html">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Help & FAQ</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-user">
+                <div class="user-card">
+                    <img src="https://ui-avatars.com/api/?name=P&background=0891b2&color=fff&size=88" class="user-avatar" id="sidebarAvatar" alt="User">
+                    <div class="user-info">
+                        <div class="user-name" id="sidebarName">Patient</div>
+                        <div class="user-role">Patient Account</div>
+                    </div>
+                    <button class="user-logout" id="logoutBtn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 class="page-title" id="pageTitle">Overview</h1>
+                </div>
+                <div class="header-right">
+                    <div class="header-date">
+                        <i class="fas fa-calendar"></i>
+                        <span id="currentDate">Loading...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                
+                <!-- ===== OVERVIEW SECTION ===== -->
+                <section id="section-overview">
+                    <!-- Welcome Hero -->
+                    <div class="welcome-hero">
+                        <div class="welcome-content">
+                            <div class="welcome-text">
+                                <h1 id="welcomeText">Good morning, Patient</h1>
+                                <p>Welcome back to your health dashboard. Here's a quick overview of your health status and upcoming activities.</p>
+                            </div>
+                            <div class="welcome-actions">
+                                <button class="btn-hero btn-hero-primary" data-section="appointments">
+                                    <i class="fas fa-calendar-plus"></i> View Appointments
+                                </button>
+                                <button class="btn-hero btn-hero-secondary" data-section="records">
+                                    <i class="fas fa-file-medical"></i> View Records
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon cyan">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <span class="stat-trend neutral">
+                                    <i class="fas fa-clock"></i> Upcoming
+                                </span>
+                            </div>
+                            <div class="stat-value" id="statAppointments">0</div>
+                            <div class="stat-label">Appointments</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon emerald">
+                                    <i class="fas fa-file-medical-alt"></i>
+                                </div>
+                                <span class="stat-trend up">
+                                    <i class="fas fa-check"></i> Synced
+                                </span>
+                            </div>
+                            <div class="stat-value" id="statRecords">0</div>
+                            <div class="stat-label">Medical Records</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-prescription-bottle-alt"></i>
+                                </div>
+                                <span class="stat-trend neutral">
+                                    <i class="fas fa-pills"></i> Active
+                                </span>
+                            </div>
+                            <div class="stat-value" id="statMeds">0</div>
+                            <div class="stat-label">Medications</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon orange">
+                                    <i class="fas fa-stethoscope"></i>
+                                </div>
+                                <span class="stat-trend neutral" id="statLastVisitTrend">
+                                    <i class="fas fa-history"></i> --
+                                </span>
+                            </div>
+                            <div class="stat-value" id="statLastVisit">--</div>
+                            <div class="stat-label">Last Checkup</div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid -->
+                    <div class="dashboard-grid">
+                        <!-- Left Column -->
+                        <div class="left-column">
+                            <!-- Appointments Card -->
+                            <div class="card" style="margin-bottom: var(--space-6);">
+                                <div class="card-header">
+                                    <h2 class="card-title">
+                                        <i class="fas fa-calendar-alt"></i> Upcoming Appointments
+                                    </h2>
+                                    <span class="card-action" data-section="appointments">View All</span>
+                                </div>
+                                <div class="card-body flush" id="appointmentsList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <p>No upcoming appointments</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Records Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">
+                                        <i class="fas fa-history"></i> Recent Medical Records
+                                    </h2>
+                                    <span class="card-action" data-section="records">View All</span>
+                                </div>
+                                <div class="card-body flush" id="recordsList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open"></i>
+                                        <p>No medical records found</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="right-column">
+                            <!-- Vitals Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">
+                                        <i class="fas fa-heartbeat"></i> Latest Vitals
+                                    </h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="vitals-grid">
+                                        <div class="vital-card">
+                                            <div class="vital-icon bp"><i class="fas fa-tint"></i></div>
+                                            <div class="vital-value" id="vitalBP">--/--</div>
+                                            <div class="vital-label">Blood Pressure</div>
+                                        </div>
+                                        <div class="vital-card">
+                                            <div class="vital-icon hr"><i class="fas fa-heart"></i></div>
+                                            <div class="vital-value" id="vitalHR">-- bpm</div>
+                                            <div class="vital-label">Heart Rate</div>
+                                        </div>
+                                        <div class="vital-card">
+                                            <div class="vital-icon temp"><i class="fas fa-thermometer-half"></i></div>
+                                            <div class="vital-value" id="vitalTemp">--°C</div>
+                                            <div class="vital-label">Temperature</div>
+                                        </div>
+                                        <div class="vital-card">
+                                            <div class="vital-icon weight"><i class="fas fa-weight"></i></div>
+                                            <div class="vital-value" id="vitalWeight">-- kg</div>
+                                            <div class="vital-label">Weight</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== APPOINTMENTS SECTION WITH CALENDAR ===== -->
+                <section id="section-appointments" class="section-hidden">
+                    <div class="appointments-layout">
+                        <!-- Calendar Panel -->
+                        <div class="calendar-panel">
+                            <h3><i class="fas fa-calendar-alt"></i> Calendar</h3>
+                            
+                            <div class="calendar-wrapper">
+                                <!-- Calendar Navigation -->
+                                <div class="calendar-nav">
+                                    <button id="prevMonth">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <span id="calMonthYear">January 2026</span>
+                                    <button id="nextMonth">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Calendar Grid -->
+                                <div class="calendar-header">
+                                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                                </div>
+                                <div class="calendar-days" id="calendarDays">
+                                    <!-- Days will be rendered by JS -->
+                                </div>
+                            </div>
+                            
+                            <!-- Legend -->
+                            <div class="calendar-legend" style="margin-top: var(--space-4); display: flex; gap: var(--space-3); flex-wrap: wrap; font-size: 0.75rem; color: var(--gray-600);">
+                                <div style="display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--blue-500);"></span> Scheduled</div>
+                                <div style="display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-500);"></span> Confirmed</div>
+                                <div style="display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--gray-400);"></span> Completed</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="appointment-right-col" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                            <!-- Appointment Details Panel -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">
+                                        <i class="fas fa-info-circle"></i> <span id="detailsPanelTitle">Select a Date</span>
+                                    </h2>
+                                </div>
+                                <div class="card-body" id="appointmentDetailsContent">
+                                    <div class="empty-state">
+                                        <i class="fas fa-hand-pointer"></i>
+                                        <p>Click on a date in the calendar to see appointment details</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- All Appointments List -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">
+                                        <i class="fas fa-list"></i> All Appointments
+                                    </h2>
+                                </div>
+                                <div class="card-body flush" id="allAppointmentsList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <p>No appointments found</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== RECORDS SECTION ===== -->
+                <section id="section-records" class="section-hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-folder-open"></i> Complete Medical History
+                            </h2>
+                        </div>
+                        <div class="card-body flush" id="allRecordsList">
+                            <div class="empty-state">
+                                <i class="fas fa-folder-open"></i>
+                                <p>No medical records found</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== EDITABLE PROFILE SECTION ===== -->
+                <section id="section-profile" class="section-hidden">
+                    <!-- Profile Hero with Photo Upload -->
+                    <div class="profile-hero">
+                        <div class="profile-photo-upload">
+                            <img src="https://ui-avatars.com/api/?name=P&background=0891b2&color=fff&size=240" class="profile-hero-avatar" id="fullProfileAvatar" alt="Profile">
+                            <label class="photo-upload-btn" for="photoUpload" title="Change Photo">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                            <input type="file" id="photoUpload" accept="image/*" hidden>
+                        </div>
+                        <div class="profile-hero-info">
+                            <h1 class="profile-hero-name" id="fullProfileName">Patient Name</h1>
+                            <p class="profile-hero-email" id="fullProfileEmail">email@example.com</p>
+                            <div class="profile-hero-badges">
+                                <span class="profile-hero-badge" id="fullProfileGender">Gender</span>
+                                <span class="profile-hero-badge" id="fullProfileBlood">Blood: --</span>
+                                <span class="profile-hero-badge" id="fullProfileAge">Age: --</span>
+                            </div>
+                        </div>
+                        <button class="edit-profile-btn" id="editProfileBtn">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                    </div>
+
+                    <!-- Profile View Mode -->
+                    <div id="profileViewMode">
+                        <div class="profile-details-grid">
+                            <!-- Personal Info -->
+                            <div class="detail-card">
+                                <div class="detail-card-header">
+                                    <i class="fas fa-user"></i> Personal Information
+                                </div>
+                                <div class="detail-card-body">
+                                    <div class="detail-row">
+                                        <span class="detail-label">First Name</span>
+                                        <span class="detail-value" id="detailFirstName">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Last Name</span>
+                                        <span class="detail-value" id="detailLastName">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Date of Birth</span>
+                                        <span class="detail-value" id="detailDOB">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Gender</span>
+                                        <span class="detail-value" id="detailGender">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">NIN</span>
+                                        <span class="detail-value" id="detailNIN">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Contact Number</span>
+                                        <span class="detail-value" id="detailContact">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Email</span>
+                                        <span class="detail-value" id="detailEmail">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Info -->
+                            <div class="detail-card">
+                                <div class="detail-card-header">
+                                    <i class="fas fa-map-marker-alt"></i> Location
+                                </div>
+                                <div class="detail-card-body">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Address</span>
+                                        <span class="detail-value" id="detailAddress">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">District</span>
+                                        <span class="detail-value" id="detailDistrict">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Village</span>
+                                        <span class="detail-value" id="detailVillage">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Nationality</span>
+                                        <span class="detail-value" id="detailNationality">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Tribe</span>
+                                        <span class="detail-value" id="detailTribe">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Emergency Contact -->
+                            <div class="detail-card">
+                                <div class="detail-card-header">
+                                    <i class="fas fa-phone-alt"></i> Emergency Contact
+                                </div>
+                                <div class="detail-card-body">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Name</span>
+                                        <span class="detail-value" id="detailNOKName">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Relationship</span>
+                                        <span class="detail-value" id="detailNOKRelation">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Contact</span>
+                                        <span class="detail-value" id="detailNOKContact">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Medical Info -->
+                            <div class="detail-card">
+                                <div class="detail-card-header">
+                                    <i class="fas fa-notes-medical"></i> Medical Information
+                                </div>
+                                <div class="detail-card-body">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Blood Group</span>
+                                        <span class="detail-value" id="detailBloodGroup">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Genotype</span>
+                                        <span class="detail-value" id="detailGenotype">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Height</span>
+                                        <span class="detail-value" id="detailHeight">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Weight</span>
+                                        <span class="detail-value" id="detailWeight">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">BMI</span>
+                                        <span class="detail-value" id="detailBMI">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Physical Characteristics -->
+                            <div class="detail-card">
+                                <div class="detail-card-header">
+                                    <i class="fas fa-child"></i> Physical Characteristics
+                                </div>
+                                <div class="detail-card-body">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Eye Color</span>
+                                        <span class="detail-value" id="detailEyeColor">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Hair Color</span>
+                                        <span class="detail-value" id="detailHairColor">--</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Skin Tone</span>
+                                        <span class="detail-value" id="detailSkinTone">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Allergies & Conditions -->
+                            <div class="detail-card">
+                                <div class="detail-card-header">
+                                    <i class="fas fa-allergies"></i> Allergies & Conditions
+                                </div>
+                                <div class="detail-card-body">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Food Allergies</span>
+                                        <span class="detail-value" id="detailFoodAllergies">None reported</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Medication Allergies</span>
+                                        <span class="detail-value" id="detailMedAllergies">None reported</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Chronic Conditions</span>
+                                        <span class="detail-value" id="detailConditions">None reported</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Medical History</span>
+                                        <span class="detail-value" id="detailMedHistory">None reported</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Edit Mode -->
+                    <div id="profileEditMode" class="edit-mode-hidden">
+                        <form id="profileEditForm" class="profile-edit-form">
+                            <div class="profile-details-grid">
+                                <!-- Personal Info Edit -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">
+                                        <i class="fas fa-user"></i> Personal Information
+                                    </div>
+                                    <div class="detail-card-body">
+                                        <div class="form-group">
+                                            <label>First Name</label>
+                                            <input type="text" id="editFirstName" class="form-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Last Name</label>
+                                            <input type="text" id="editLastName" class="form-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Contact Number</label>
+                                            <input type="tel" id="editContact" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>NIN (National ID)</label>
+                                            <input type="text" id="editNIN" class="form-input" placeholder="Enter National ID">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Location Edit -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">
+                                        <i class="fas fa-map-marker-alt"></i> Location
+                                    </div>
+                                    <div class="detail-card-body">
+                                        <div class="form-group">
+                                            <label>Address</label>
+                                            <textarea id="editAddress" class="form-input" rows="2"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>District</label>
+                                            <input type="text" id="editDistrict" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Village</label>
+                                            <input type="text" id="editVillage" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Nationality</label>
+                                            <input type="text" id="editNationality" class="form-input" placeholder="e.g., Ugandan">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tribe</label>
+                                            <input type="text" id="editTribe" class="form-input" placeholder="e.g., Baganda">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Emergency Contact Edit -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">
+                                        <i class="fas fa-phone-alt"></i> Emergency Contact
+                                    </div>
+                                    <div class="detail-card-body">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" id="editNOKName" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Relationship</label>
+                                            <select id="editNOKRelation" class="form-input">
+                                                <option value="">Select</option>
+                                                <option value="Spouse">Spouse</option>
+                                                <option value="Parent">Parent</option>
+                                                <option value="Child">Child</option>
+                                                <option value="Sibling">Sibling</option>
+                                                <option value="Friend">Friend</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Contact</label>
+                                            <input type="tel" id="editNOKContact" class="form-input">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Medical Info Edit -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">
+                                        <i class="fas fa-notes-medical"></i> Medical Information
+                                    </div>
+                                    <div class="detail-card-body">
+                                        <div class="form-group">
+                                            <label>Blood Group</label>
+                                            <select id="editBloodGroup" class="form-input">
+                                                <option value="">Select</option>
+                                                <option value="A+">A+</option>
+                                                <option value="A-">A-</option>
+                                                <option value="B+">B+</option>
+                                                <option value="B-">B-</option>
+                                                <option value="AB+">AB+</option>
+                                                <option value="AB-">AB-</option>
+                                                <option value="O+">O+</option>
+                                                <option value="O-">O-</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Genotype</label>
+                                            <select id="editGenotype" class="form-input">
+                                                <option value="">Select</option>
+                                                <option value="AA">AA</option>
+                                                <option value="AS">AS</option>
+                                                <option value="SS">SS</option>
+                                                <option value="AC">AC</option>
+                                                <option value="SC">SC</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Height (cm)</label>
+                                                <input type="number" id="editHeight" class="form-input" step="0.1">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Weight (kg)</label>
+                                                <input type="number" id="editWeight" class="form-input" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Physical Characteristics Edit -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">
+                                        <i class="fas fa-child"></i> Physical Characteristics
+                                    </div>
+                                    <div class="detail-card-body">
+                                        <div class="form-group">
+                                            <label>Eye Color</label>
+                                            <select id="editEyeColor" class="form-input">
+                                                <option value="">Select</option>
+                                                <option value="Brown">Brown</option>
+                                                <option value="Black">Black</option>
+                                                <option value="Blue">Blue</option>
+                                                <option value="Green">Green</option>
+                                                <option value="Hazel">Hazel</option>
+                                                <option value="Gray">Gray</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Hair Color</label>
+                                            <select id="editHairColor" class="form-input">
+                                                <option value="">Select</option>
+                                                <option value="Black">Black</option>
+                                                <option value="Brown">Brown</option>
+                                                <option value="Blonde">Blonde</option>
+                                                <option value="Gray">Gray</option>
+                                                <option value="White">White</option>
+                                                <option value="Red">Red</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Skin Tone</label>
+                                            <select id="editSkinTone" class="form-input">
+                                                <option value="">Select</option>
+                                                <option value="Fair">Fair</option>
+                                                <option value="Light Brown">Light Brown</option>
+                                                <option value="Medium Brown">Medium Brown</option>
+                                                <option value="Dark Brown">Dark Brown</option>
+                                                <option value="Very Dark">Very Dark</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Allergies & Conditions Edit -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">
+                                        <i class="fas fa-allergies"></i> Allergies & Conditions
+                                    </div>
+                                    <div class="detail-card-body">
+                                        <div class="form-group">
+                                            <label>Food Allergies (comma-separated)</label>
+                                            <input type="text" id="editFoodAllergies" class="form-input" placeholder="e.g., Peanuts, Shellfish">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Medication Allergies (comma-separated)</label>
+                                            <input type="text" id="editMedAllergies" class="form-input" placeholder="e.g., Penicillin, Aspirin">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Chronic Conditions (comma-separated)</label>
+                                            <input type="text" id="editConditions" class="form-input" placeholder="e.g., Diabetes, Hypertension">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="form-actions">
+                                <button type="button" class="btn-secondary" id="cancelEditBtn">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn-primary" id="saveProfileBtn">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/patient-dashboard.js?v=7"></script>
+</body>
+</html>

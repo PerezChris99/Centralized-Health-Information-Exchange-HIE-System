@@ -8,9 +8,11 @@ import hashlib
 
 from extensions import db
 from models.user import User
+from models.patient import Patient
 from models.user_session import UserSession
 from models.audit_log import AuditLog
 from services.email_service import send_email
+from services.logging_service import ActivityLogger
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,6 +21,7 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     """Register a new user"""
     data = request.get_json()
+    ip_address = request.remote_addr
     
     # Validate required fields
     if not all(k in data for k in ['name', 'email', 'password']):
@@ -26,6 +29,8 @@ def register():
     
     # Check if user already exists
     if User.query.filter_by(email=data['email']).first():
+        ActivityLogger.log_auth('register', data['email'], ip_address=ip_address, 
+                                details="Registration failed - email already exists", success=False)
         return jsonify({'success': False, 'error': 'Email already registered'}), 400
     
     # Create new user
@@ -39,16 +44,97 @@ def register():
     db.session.add(user)
     db.session.commit()
     
+    # Log successful registration
+    ActivityLogger.log_auth('register', data['email'], user_id=user.id, ip_address=ip_address,
+                            details=f"New {user.role} account created", success=True)
+    
+    # If registering as a patient, link to patient record if email matches
+    if user.role == 'patient':
+        patient = Patient.query.filter_by(email=data['email']).first()
+        if patient and not patient.user_id:
+            patient.user_id = user.id
+            db.session.commit()
+            ActivityLogger.log_auth('patient_linked', data['email'], user_id=user.id,
+                                    ip_address=ip_address, details=f"Linked to patient record ID: {patient.id}")
+    
     return jsonify({
         'success': True,
         'message': 'Registration successful. Please login to continue.'
     }), 201
 
 
+@auth_bp.route('/register/patient', methods=['POST'])
+def register_patient():
+    """Register a new patient user account"""
+    data = request.get_json()
+    ip_address = request.remote_addr
+    
+    # Validate required fields
+    required = ['firstName', 'lastName', 'email', 'password', 'dateOfBirth', 'gender']
+    if not all(k in data for k in required):
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+    
+    # Check if user already exists
+    if User.query.filter_by(email=data['email']).first():
+        ActivityLogger.log_auth('patient_register', data['email'], ip_address=ip_address,
+                                details="Registration failed - email already exists", success=False)
+        return jsonify({'success': False, 'error': 'Email already registered'}), 400
+    
+    try:
+        # Create user account first
+        user = User(
+            name=f"{data['firstName']} {data['lastName']}",
+            email=data['email'],
+            role='patient'
+        )
+        user.set_password(data['password'])
+        db.session.add(user)
+        db.session.flush()  # Get user ID without committing
+        
+        # Check if patient record already exists with this email
+        existing_patient = Patient.query.filter_by(email=data['email']).first()
+        
+        if existing_patient:
+            # Link existing patient to new user account
+            existing_patient.user_id = user.id
+            patient = existing_patient
+        else:
+            # Create new patient record
+            patient = Patient(
+                first_name=data['firstName'],
+                last_name=data['lastName'],
+                email=data['email'],
+                date_of_birth=datetime.strptime(data['dateOfBirth'], '%Y-%m-%d').date(),
+                gender=data['gender'],
+                contact_number=data.get('contactNumber'),
+                address=data.get('address'),
+                user_id=user.id
+            )
+            db.session.add(patient)
+        
+        db.session.commit()
+        
+        # Log successful registration
+        ActivityLogger.log_auth('patient_register', data['email'], user_id=user.id, 
+                                ip_address=ip_address, details=f"Patient account created, Patient ID: {patient.id}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Patient registration successful. Please login to continue.'
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        ActivityLogger.log_auth('patient_register', data['email'], ip_address=ip_address,
+                                details=f"Registration failed - {str(e)}", success=False)
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Login user and return JWT token"""
     data = request.get_json()
+    ip_address = request.remote_addr
     
     # Validate required fields
     if not all(k in data for k in ['email', 'password']):
@@ -58,10 +144,15 @@ def login():
     user = User.query.filter_by(email=data['email']).first()
     
     if not user or not user.check_password(data['password']):
+        ActivityLogger.log_auth('login', data['email'], ip_address=ip_address,
+                                details="Invalid credentials", success=False)
         return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
     
     # Check if user is blocked
     if user.is_blocked:
+        ActivityLogger.log_security('blocked_login_attempt', user_id=user.id, 
+                                    user_email=user.email, ip_address=ip_address,
+                                    details=f"Blocked user attempted login. Reason: {user.blocked_reason}")
         return jsonify({
             'success': False, 
             'error': 'Your account has been blocked due to suspicious activity. Please contact the administrator.',
@@ -77,7 +168,6 @@ def login():
     user.record_login()
     
     # Create session record
-    ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', '')[:500]  # Limit length
     session = UserSession.create_session(
         user_id=user.id,
@@ -86,7 +176,7 @@ def login():
         session_token=hashlib.sha256(access_token.encode()).hexdigest()[:64]
     )
     
-    # Log the login action
+    # Log the login action to database
     AuditLog.log_action(
         user_id=user.id,
         action='login',
@@ -96,13 +186,36 @@ def login():
         ip_address=ip_address
     )
     
-    return jsonify({
+    # Log to file
+    ActivityLogger.log_auth('login', user.email, user_id=user.id, ip_address=ip_address,
+                            details=f"Role: {user.role}", success=True)
+    
+    # Get patient info if user is a patient
+    patient_info = None
+    patient_id = None
+    if user.role == 'patient':
+        patient = Patient.query.filter_by(user_id=user.id).first()
+        if patient:
+            patient_info = patient.to_dict()
+            patient_id = patient.id
+    
+    # Build user data with patient_id if applicable
+    user_data = user.to_dict()
+    if patient_id:
+        user_data['patient_id'] = patient_id
+    
+    response_data = {
         'success': True,
         'token': access_token,
         'refresh_token': refresh_token,
         'sessionId': session.id,
-        'user': user.to_dict()
-    }), 200
+        'user': user_data
+    }
+    
+    if patient_info:
+        response_data['patient'] = patient_info
+    
+    return jsonify(response_data), 200
 
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -111,6 +224,7 @@ def logout():
     """Logout user and end session"""
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+    ip_address = request.remote_addr
     
     if user:
         # End all active sessions for this user
@@ -120,15 +234,18 @@ def logout():
         
         user.record_logout()
         
-        # Log the logout action
+        # Log the logout action to database
         AuditLog.log_action(
             user_id=user.id,
             action='logout',
             resource_type='user',
             resource_id=user.id,
             details="User logged out",
-            ip_address=request.remote_addr
+            ip_address=ip_address
         )
+        
+        # Log to file
+        ActivityLogger.log_auth('logout', user.email, user_id=user.id, ip_address=ip_address)
     
     return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
 

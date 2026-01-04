@@ -9,6 +9,8 @@ from extensions import db, socketio
 from models.appointment import Appointment
 from models.patient import Patient
 from models.user import User
+from models.audit_log import AuditLog
+from services.logging_service import ActivityLogger
 
 appointment_bp = Blueprint('appointments', __name__)
 
@@ -17,7 +19,9 @@ appointment_bp = Blueprint('appointments', __name__)
 @jwt_required()
 def create_appointment():
     """Create a new appointment"""
+    current_user_id = get_jwt_identity()
     data = request.get_json()
+    ip_address = request.remote_addr
     
     # Validate required fields
     required_fields = ['patient', 'doctor', 'date', 'reason']
@@ -46,6 +50,28 @@ def create_appointment():
         db.session.add(appointment)
         db.session.commit()
         
+        # Log to database
+        AuditLog.log_action(
+            user_id=current_user_id,
+            action='create',
+            resource_type='appointment',
+            resource_id=appointment.id,
+            details=f"Appointment scheduled for {patient.first_name} {patient.last_name} with Dr. {doctor.name}",
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_appointment(
+            action='created',
+            patient_name=f"{patient.first_name} {patient.last_name}",
+            doctor_name=doctor.name,
+            appointment_id=appointment.id,
+            user_id=current_user_id,
+            appointment_date=appointment.date.isoformat(),
+            ip_address=ip_address,
+            details=f"Reason: {data['reason']}"
+        )
+        
         # Emit real-time notification
         socketio.emit('appointment_created', appointment.to_dict())
         
@@ -58,9 +84,30 @@ def create_appointment():
 @appointment_bp.route('', methods=['GET'])
 @jwt_required()
 def get_all_appointments():
-    """Get all appointments"""
+    """Get all appointments, optionally filtered by patient or doctor"""
     try:
-        appointments = Appointment.query.order_by(Appointment.date.desc()).all()
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        query = Appointment.query
+
+        # Filter by patient_id if provided via querystring
+        patient_id_param = request.args.get('patient_id')
+        if patient_id_param:
+            query = query.filter_by(patient_id=patient_id_param)
+
+        # If the logged-in user is a patient, only return their own appointments
+        if user and user.role == 'patient':
+            patient = Patient.query.filter_by(user_id=current_user_id).first()
+            if not patient:
+                return jsonify([]), 200
+            query = query.filter_by(patient_id=patient.id)
+
+        # If user is a provider, only show their appointments unless they are admin
+        if user and user.role == 'provider':
+            query = query.filter_by(doctor_id=current_user_id)
+
+        appointments = query.order_by(Appointment.date.desc()).all()
         return jsonify([a.to_dict() for a in appointments]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -82,12 +129,15 @@ def get_appointment(id):
 @jwt_required()
 def update_appointment(id):
     """Update appointment by ID"""
+    current_user_id = get_jwt_identity()
+    ip_address = request.remote_addr
     appointment = Appointment.query.get(id)
     
     if not appointment:
         return jsonify({'error': 'Appointment not found'}), 404
     
     data = request.get_json()
+    old_status = appointment.status
     
     try:
         if 'patient' in data:
@@ -113,6 +163,38 @@ def update_appointment(id):
         
         db.session.commit()
         
+        # Get names for logging
+        patient = Patient.query.get(appointment.patient_id)
+        doctor = User.query.get(appointment.doctor_id)
+        patient_name = f"{patient.first_name} {patient.last_name}" if patient else "Unknown"
+        doctor_name = doctor.name if doctor else "Unknown"
+        
+        # Log to database
+        details = f"Appointment updated for {patient_name}"
+        if 'status' in data and old_status != data['status']:
+            details += f" | Status changed: {old_status} → {data['status']}"
+        
+        AuditLog.log_action(
+            user_id=current_user_id,
+            action='update',
+            resource_type='appointment',
+            resource_id=appointment.id,
+            details=details,
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_appointment(
+            action='updated',
+            patient_name=patient_name,
+            doctor_name=doctor_name,
+            appointment_id=appointment.id,
+            user_id=current_user_id,
+            appointment_date=appointment.date.isoformat() if appointment.date else None,
+            ip_address=ip_address,
+            details=details
+        )
+        
         # Emit real-time notification
         socketio.emit('appointment_updated', appointment.to_dict())
         
@@ -126,14 +208,44 @@ def update_appointment(id):
 @jwt_required()
 def delete_appointment(id):
     """Delete appointment by ID"""
+    current_user_id = get_jwt_identity()
+    ip_address = request.remote_addr
     appointment = Appointment.query.get(id)
     
     if not appointment:
         return jsonify({'error': 'Appointment not found'}), 404
     
+    # Get names for logging before delete
+    patient = Patient.query.get(appointment.patient_id)
+    doctor = User.query.get(appointment.doctor_id)
+    patient_name = f"{patient.first_name} {patient.last_name}" if patient else "Unknown"
+    doctor_name = doctor.name if doctor else "Unknown"
+    appt_date = appointment.date.isoformat() if appointment.date else "Unknown"
+    
     try:
         db.session.delete(appointment)
         db.session.commit()
+        
+        # Log to database
+        AuditLog.log_action(
+            user_id=current_user_id,
+            action='delete',
+            resource_type='appointment',
+            resource_id=id,
+            details=f"Deleted appointment for {patient_name} with Dr. {doctor_name} on {appt_date}",
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_appointment(
+            action='deleted',
+            patient_name=patient_name,
+            doctor_name=doctor_name,
+            appointment_id=id,
+            user_id=current_user_id,
+            appointment_date=appt_date,
+            ip_address=ip_address
+        )
         
         # Emit real-time notification
         socketio.emit('appointment_deleted', {'id': id})

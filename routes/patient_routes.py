@@ -9,6 +9,7 @@ from extensions import db, socketio
 from models.patient import Patient
 from models.user import User
 from models.audit_log import AuditLog
+from services.logging_service import ActivityLogger
 
 patient_bp = Blueprint('patients', __name__)
 
@@ -18,6 +19,8 @@ patient_bp = Blueprint('patients', __name__)
 def create_patient():
     """Create a new patient"""
     data = request.get_json()
+    current_user_id = get_jwt_identity()
+    ip_address = request.remote_addr
     
     # Validate required fields
     required_fields = ['firstName', 'lastName', 'dateOfBirth', 'gender']
@@ -37,6 +40,19 @@ def create_patient():
             contact_number=data.get('contactNumber'),
             email=data.get('email'),
             address=data.get('address'),
+            # Ugandan Specific
+            nin=data.get('nin'),
+            village=data.get('village'),
+            district=data.get('district'),
+            # Next of Kin
+            next_of_kin_name=data.get('nextOfKinName'),
+            next_of_kin_contact=data.get('nextOfKinContact'),
+            next_of_kin_relationship=data.get('nextOfKinRelationship'),
+            # Medical
+            blood_group=data.get('bloodGroup'),
+            genotype=data.get('genotype'),
+            chronic_conditions=data.get('chronicConditions', []),
+            # Physical
             height=data.get('height'),
             weight=data.get('weight'),
             eye_color=data.get('eyeColor'),
@@ -53,8 +69,7 @@ def create_patient():
         db.session.add(patient)
         db.session.commit()
         
-        # Log the action
-        current_user_id = get_jwt_identity()
+        # Log the action to database
         current_user = User.query.get(current_user_id)
         AuditLog.log_action(
             user_id=current_user_id,
@@ -62,7 +77,18 @@ def create_patient():
             resource_type='patient',
             resource_id=patient.id,
             details=f"{current_user.name} registered new patient: {patient.first_name} {patient.last_name}",
-            ip_address=request.remote_addr
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_patient(
+            action='created',
+            patient_name=f"{patient.first_name} {patient.last_name}",
+            patient_id=patient.id,
+            user_id=current_user_id,
+            user_name=current_user.name if current_user else None,
+            ip_address=ip_address,
+            details=f"NIN: {patient.nin or 'N/A'}"
         )
         
         # Emit real-time notification
@@ -79,6 +105,16 @@ def create_patient():
 def get_all_patients():
     """Get all patients"""
     try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        # If user is a patient, only return their own record
+        if user and user.role == 'patient':
+            patient = Patient.query.filter_by(user_id=current_user_id).first()
+            if patient:
+                return jsonify([patient.to_dict()]), 200
+            return jsonify([]), 200
+        
         patients = Patient.query.order_by(Patient.created_at.desc()).all()
         return jsonify([p.to_dict() for p in patients]), 200
     except Exception as e:
@@ -153,13 +189,26 @@ def update_patient(id):
         # Log the action
         current_user_id = get_jwt_identity()
         current_user = User.query.get(current_user_id)
+        ip_address = request.remote_addr
+        
         AuditLog.log_action(
             user_id=current_user_id,
             action='update',
             resource_type='patient',
             resource_id=patient.id,
             details=f"{current_user.name} updated patient record: {patient.first_name} {patient.last_name}",
-            ip_address=request.remote_addr
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_patient(
+            action='updated',
+            patient_name=f"{patient.first_name} {patient.last_name}",
+            patient_id=patient.id,
+            user_id=current_user_id,
+            user_name=current_user.name if current_user else None,
+            ip_address=ip_address,
+            details=f"Fields updated: {list(data.keys())}"
         )
         
         # Emit real-time notification
@@ -181,21 +230,33 @@ def delete_patient(id):
         return jsonify({'error': 'Patient not found'}), 404
     
     patient_name = f"{patient.first_name} {patient.last_name}"
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    ip_address = request.remote_addr
     
     try:
         db.session.delete(patient)
         db.session.commit()
         
-        # Log the action
-        current_user_id = get_jwt_identity()
-        current_user = User.query.get(current_user_id)
+        # Log the action to database
         AuditLog.log_action(
             user_id=current_user_id,
             action='delete',
             resource_type='patient',
             resource_id=id,
             details=f"{current_user.name} deleted patient record: {patient_name}",
-            ip_address=request.remote_addr
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_patient(
+            action='deleted',
+            patient_name=patient_name,
+            patient_id=id,
+            user_id=current_user_id,
+            user_name=current_user.name if current_user else None,
+            ip_address=ip_address,
+            details="Patient record permanently removed"
         )
         
         # Emit real-time notification
@@ -223,3 +284,97 @@ def search_patients():
     ).all()
     
     return jsonify([p.to_dict() for p in patients]), 200
+
+
+@patient_bp.route('/activity', methods=['POST'])
+@jwt_required()
+def log_patient_activity():
+    """Log patient dashboard activity for admin monitoring"""
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    ip_address = request.remote_addr
+    data = request.get_json()
+    
+    if not user or user.role != 'patient':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    action = data.get('action', 'view')
+    resource = data.get('resource', 'dashboard')
+    details = data.get('details', '')
+    
+    # Get patient info
+    patient = Patient.query.filter_by(user_id=current_user_id).first()
+    patient_name = f"{patient.first_name} {patient.last_name}" if patient else user.name
+    
+    # Log to database audit log
+    AuditLog.log_action(
+        user_id=current_user_id,
+        action=action,
+        resource_type=f'patient_{resource}',
+        resource_id=patient.id if patient else current_user_id,
+        details=f"Patient {patient_name}: {details}",
+        ip_address=ip_address
+    )
+    
+    # Log to file
+    ActivityLogger.log_patient(
+        action=action,
+        patient_name=patient_name,
+        patient_id=patient.id if patient else 0,
+        user_id=current_user_id,
+        ip_address=ip_address,
+        details=details
+    )
+    
+    return jsonify({'success': True}), 200
+
+
+@patient_bp.route('/<int:id>/photo', methods=['PUT'])
+@jwt_required()
+def update_patient_photo(id):
+    """Update patient profile photo"""
+    patient = Patient.query.get(id)
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    ip_address = request.remote_addr
+    
+    if not patient:
+        return jsonify({'error': 'Patient not found'}), 404
+    
+    # Verify the patient owns this profile or is admin
+    if user.role == 'patient' and patient.user_id != current_user_id:
+        return jsonify({'error': 'Unauthorized to update this profile'}), 403
+    
+    data = request.get_json()
+    photo_data = data.get('photo')
+    
+    if not photo_data:
+        return jsonify({'error': 'No photo data provided'}), 400
+    
+    try:
+        patient.photo = photo_data
+        db.session.commit()
+        
+        # Log the action
+        AuditLog.log_action(
+            user_id=current_user_id,
+            action='update',
+            resource_type='patient_photo',
+            resource_id=patient.id,
+            details=f"Profile photo updated for {patient.first_name} {patient.last_name}",
+            ip_address=ip_address
+        )
+        
+        ActivityLogger.log_patient(
+            action='photo_updated',
+            patient_name=f"{patient.first_name} {patient.last_name}",
+            patient_id=patient.id,
+            user_id=current_user_id,
+            ip_address=ip_address,
+            details="Profile photo updated"
+        )
+        
+        return jsonify({'success': True, 'message': 'Photo updated successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400

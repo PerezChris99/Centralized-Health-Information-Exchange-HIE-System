@@ -22,22 +22,9 @@
     
     <!-- App CSS -->
     <link rel="stylesheet" href="css/main.css">
-    <style>
-        /* Compact navbar overrides */
-        .navbar-medical { padding: 0.3rem 0.5rem; }
-        .navbar-brand { font-size: 0.9rem; }
-        .nav-link { font-size: 0.75rem; padding: 0.3rem 0.5rem !important; }
-        .navbar .btn-sm { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
-        /* API docs compact */
-        .api-docs h3 { font-size: 0.95rem; }
-        .api-docs h4 { font-size: 0.85rem; }
-        .api-docs p, .api-docs li { font-size: 0.75rem; }
-        .api-docs code { font-size: 0.7rem; }
-        .api-docs pre { font-size: 0.65rem; padding: 0.5rem; }
-        .api-docs .badge { font-size: 0.6rem; }
-    </style>
+    <link rel="stylesheet" href="css/api-docs.css">
 </head>
-<body>
+<body class="api-docs">
     <!-- Navigation -->
     <nav class="navbar navbar-medical navbar-expand-lg sticky-top">
         <div class="container-fluid px-2">
@@ -420,30 +407,6 @@
     
     <!-- App JS -->
     <script src="js/app.js"></script>
-    
-    <!-- Auth & Role Check -->
-    <script>
-        // Redirect to login if not authenticated, or dashboard if not admin
-        (function() {
-            const token = localStorage.getItem('hie_token');
-            const userData = localStorage.getItem('hie_user');
-            
-            if (!token) {
-                window.location.href = '/login.html';
-                return;
-            }
-            
-            try {
-                const user = JSON.parse(userData);
-                if (user.role !== 'admin') {
-                    alert('Access denied. API documentation is restricted to administrators only.');
-                    window.location.href = '/dashboard.html';
-                    return;
-                }
-            } catch (e) {
-                window.location.href = '/login.html';
-            }
-        })();
-    </script>
+    <script src="js/api-docs.js"></script>
 </body>
 </html>

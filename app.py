@@ -50,9 +50,17 @@ def create_app(config_class=Config):
     def register_page():
         return send_from_directory(app.static_folder, 'register.html')
     
+    @app.route('/patient-register')
+    def patient_register_page():
+        return send_from_directory(app.static_folder, 'patient-register.html')
+    
     @app.route('/dashboard')
     def dashboard():
         return send_from_directory(app.static_folder, 'dashboard.html')
+    
+    @app.route('/patient-dashboard')
+    def patient_dashboard():
+        return send_from_directory(app.static_folder, 'patient-dashboard.html')
     
     @app.route('/admin')
     def admin_dashboard():

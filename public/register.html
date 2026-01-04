@@ -22,89 +22,7 @@
     
     <!-- App CSS -->
     <link rel="stylesheet" href="css/main.css">
-    <style>
-        .auth-navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-            padding: 0.5rem 0;
-        }
-        .auth-navbar .navbar-brand {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #0d6efd !important;
-        }
-        .auth-navbar .nav-link {
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: #333 !important;
-            padding: 0.4rem 0.75rem;
-        }
-        .auth-navbar .nav-link:hover {
-            color: #0d6efd !important;
-        }
-        .auth-navbar .btn-login {
-            border: 2px solid #0d6efd;
-            color: #0d6efd;
-            border-radius: 18px;
-            padding: 0.35rem 1rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .auth-navbar .btn-login:hover {
-            background: #0d6efd;
-            color: white;
-        }
-        body.bg-primary-light {
-            padding-top: 60px;
-        }
-        .auth-card {
-            padding: 1.25rem;
-        }
-        .auth-card .medical-icon {
-            width: 55px;
-            height: 55px;
-            font-size: 1.4rem;
-            margin: 0 auto 0.75rem;
-        }
-        .auth-card h2 {
-            font-size: 1.2rem;
-        }
-        .auth-card p {
-            font-size: 0.9rem;
-        }
-        .auth-card .form-label {
-            font-size: 0.9rem;
-            margin-bottom: 0.25rem;
-        }
-        .auth-card .form-control,
-        .auth-card .form-select {
-            font-size: 0.9rem;
-            padding: 0.45rem 0.6rem;
-        }
-        .auth-card .form-text {
-            font-size: 0.8rem;
-        }
-        .auth-card .btn {
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem;
-        }
-        .progress-steps {
-            margin-bottom: 1.25rem;
-        }
-        .progress-steps .step {
-            font-size: 0.85rem;
-        }
-        .progress-steps .step-number {
-            width: 26px;
-            height: 26px;
-            font-size: 0.8rem;
-        }
-        .container {
-            padding-top: 1.25rem;
-            padding-bottom: 1.25rem;
-        }
-    </style>
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body class="bg-primary-light">
     <!-- Navigation -->
@@ -147,6 +65,10 @@
                         </div>
                         <h2 class="text-primary-color mb-2">Create Account</h2>
                         <p class="text-muted">Join the Health Information Exchange System</p>
+                        <div class="mt-2 mb-3">
+                            <span class="text-muted small">Are you a patient? </span>
+                            <a href="patient-register.html" class="text-primary small fw-bold">Register as Patient</a>
+                        </div>
                     </div>
 
                     <!-- Progress Steps -->
@@ -171,7 +93,7 @@
                                 </label>
                                 <select id="userType" class="form-select" required>
                                     <option value="">Select your role</option>
-                                    <option value="user">Patient</option>
+                                    <option value="patient">Patient</option>
                                     <option value="healthcare-provider">Healthcare Provider</option>
                                 </select>
                             </div>
@@ -312,66 +234,12 @@
     
     <!-- App JS -->
     <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
     
     <!-- Page-specific JS -->
     <script>
-        // Step navigation
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const stepIndicator1 = document.getElementById('stepIndicator1');
-        const stepIndicator2 = document.getElementById('stepIndicator2');
-        const nextStepBtn = document.getElementById('nextStepBtn');
-        const prevStepBtn = document.getElementById('prevStepBtn');
-
-        nextStepBtn.addEventListener('click', function() {
-            // Validate step 1
-            const userType = document.getElementById('userType').value;
-            const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-
-            if (!userType || !fullName || !email || !password) {
-                HIE.notifications.warning('Please fill in all fields');
-                return;
-            }
-
-            if (password.length < 6) {
-                HIE.notifications.warning('Password must be at least 6 characters');
-                return;
-            }
-
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                HIE.notifications.warning('Please enter a valid email address');
-                return;
-            }
-
-            // Show step 2
-            step1.style.display = 'none';
-            step2.style.display = 'block';
-            stepIndicator2.classList.add('active');
-        });
-
-        prevStepBtn.addEventListener('click', function() {
-            step1.style.display = 'block';
-            step2.style.display = 'none';
-            stepIndicator2.classList.remove('active');
-        });
-
-        // Redirect if already logged in (validate token first)
-        (async function() {
-            if (HIE.auth.isAuthenticated()) {
-                try {
-                    // Validate token by making an API call
-                    await HIE.api.getPatients();
-                    window.location.href = '/dashboard.html';
-                } catch (e) {
-                    // Token is invalid, clear it (don't use logout which redirects)
-                    HIE.auth.clearAuth();
-                }
-            }
-        })();
+        // Initialize register page
+        AuthModule.initRegisterPage();
     </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ from models.medical_record import MedicalRecord
 from models.patient import Patient
 from models.user import User
 from models.audit_log import AuditLog
+from services.logging_service import ActivityLogger
 
 medical_record_bp = Blueprint('medical_records', __name__)
 
@@ -20,6 +21,7 @@ def create_medical_record():
     """Create a new medical record"""
     data = request.get_json()
     current_user_id = get_jwt_identity()
+    ip_address = request.remote_addr
     
     # Validate patient exists
     if not data.get('patient'):
@@ -45,15 +47,29 @@ def create_medical_record():
         db.session.add(medical_record)
         db.session.commit()
         
-        # Log the action
+        # Log the action to database
         current_user = User.query.get(current_user_id)
+        patient_name = f"{patient.first_name} {patient.last_name}"
+        
         AuditLog.log_action(
             user_id=current_user_id,
             action='create',
             resource_type='medicalRecord',
             resource_id=medical_record.id,
-            details=f"{current_user.name} created medical record for patient: {patient.first_name} {patient.last_name}",
-            ip_address=request.remote_addr
+            details=f"{current_user.name} created medical record for patient: {patient_name}",
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_medical_record(
+            action='created',
+            record_id=medical_record.id,
+            patient_name=patient_name,
+            patient_id=patient.id,
+            user_id=current_user_id,
+            user_name=current_user.name if current_user else None,
+            ip_address=ip_address,
+            details=f"Diagnosis: {data.get('diagnosis', [])}"
         )
         
         return jsonify({
@@ -70,7 +86,19 @@ def create_medical_record():
 def get_all_medical_records():
     """Get all medical records"""
     try:
-        medical_records = MedicalRecord.query.order_by(MedicalRecord.visit_date.desc()).all()
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        query = MedicalRecord.query
+
+        # If the logged-in user is a patient, only return their own records
+        if user and user.role == 'patient':
+            patient = Patient.query.filter_by(user_id=current_user_id).first()
+            if not patient:
+                return jsonify({'success': True, 'count': 0, 'data': []}), 200
+            query = query.filter_by(patient_id=patient.id)
+
+        medical_records = query.order_by(MedicalRecord.visit_date.desc()).all()
         return jsonify({
             'success': True,
             'count': len(medical_records),
@@ -118,6 +146,7 @@ def update_medical_record(id):
     """Update medical record by ID"""
     current_user_id = get_jwt_identity()
     current_user = User.query.get(current_user_id)
+    ip_address = request.remote_addr
     
     medical_record = MedicalRecord.query.get(id)
     
@@ -146,13 +175,27 @@ def update_medical_record(id):
         
         # Log the action
         patient = Patient.query.get(medical_record.patient_id)
+        patient_name = f"{patient.first_name} {patient.last_name}" if patient else "Unknown"
+        
         AuditLog.log_action(
             user_id=current_user_id,
             action='update',
             resource_type='medicalRecord',
             resource_id=medical_record.id,
-            details=f"{current_user.name} updated medical record for patient: {patient.first_name} {patient.last_name}",
-            ip_address=request.remote_addr
+            details=f"{current_user.name} updated medical record for patient: {patient_name}",
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_medical_record(
+            action='updated',
+            record_id=medical_record.id,
+            patient_name=patient_name,
+            patient_id=medical_record.patient_id,
+            user_id=current_user_id,
+            user_name=current_user.name if current_user else None,
+            ip_address=ip_address,
+            details=f"Fields updated: {list(data.keys())}"
         )
         
         return jsonify({
@@ -170,6 +213,7 @@ def delete_medical_record(id):
     """Delete medical record by ID"""
     current_user_id = get_jwt_identity()
     current_user = User.query.get(current_user_id)
+    ip_address = request.remote_addr
     
     medical_record = MedicalRecord.query.get(id)
     
@@ -191,14 +235,26 @@ def delete_medical_record(id):
         db.session.delete(medical_record)
         db.session.commit()
         
-        # Log the action
+        # Log the action to database
         AuditLog.log_action(
             user_id=current_user_id,
             action='delete',
             resource_type='medicalRecord',
             resource_id=record_id,
             details=f"{current_user.name} deleted medical record for patient: {patient_name}",
-            ip_address=request.remote_addr
+            ip_address=ip_address
+        )
+        
+        # Log to file
+        ActivityLogger.log_medical_record(
+            action='deleted',
+            record_id=record_id,
+            patient_name=patient_name,
+            patient_id=patient.id if patient else None,
+            user_id=current_user_id,
+            user_name=current_user.name if current_user else None,
+            ip_address=ip_address,
+            details="Medical record permanently removed"
         )
         
         return jsonify({
