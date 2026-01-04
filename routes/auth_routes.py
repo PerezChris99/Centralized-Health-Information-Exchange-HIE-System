@@ -6,7 +6,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from datetime import datetime
 import hashlib
 
-from extensions import db
+from extensions import db, socketio
 from models.user import User
 from models.patient import Patient
 from models.user_session import UserSession
@@ -381,6 +381,31 @@ def login():
     if patient_info:
         response_data['patient'] = patient_info
     
+    # Check if user was recently unblocked - include comprehensive notification data
+    if user.was_unblocked:
+        response_data['unblock_notification'] = {
+            'was_unblocked': True,
+            'unblocked_at': (user.unblocked_at.isoformat() + 'Z') if user.unblocked_at else None,
+            'resolution': user.unblock_reason,  # The resolution/reason for unblocking
+            'block_reason': user.original_block_reason,  # Original reason for blocking
+            'blocked_at': (user.original_blocked_at.isoformat() + 'Z') if user.original_blocked_at else None,
+            'unblocked_by': user.unblocked_by_name or 'Administrator'
+        }
+        # Clear the unblock tracking after sending
+        user.was_unblocked = False
+        user.original_block_reason = None
+        user.original_blocked_at = None
+        db.session.commit()
+    
+    # Emit real-time login notification for admin panel
+    socketio.emit('user_login', {
+        'user_id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'role': user.role,
+        'timestamp': datetime.utcnow().isoformat() + 'Z'
+    })
+    
     return jsonify(response_data), 200
 
 
@@ -412,6 +437,15 @@ def logout():
         
         # Log to file
         ActivityLogger.log_auth('logout', user.email, user_id=user.id, ip_address=ip_address)
+        
+        # Emit real-time logout notification for admin panel
+        socketio.emit('user_logout', {
+            'user_id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'role': user.role,
+            'timestamp': datetime.utcnow().isoformat() + 'Z'
+        })
     
     return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
 
@@ -430,6 +464,14 @@ def update_activity():
         active_session = UserSession.query.filter_by(user_id=user_id, is_active=True).first()
         if active_session:
             active_session.update_activity()
+        
+        # Emit real-time activity update for admin panel
+        socketio.emit('user_activity', {
+            'user_id': user.id,
+            'name': user.name,
+            'last_activity': datetime.utcnow().isoformat() + 'Z',
+            'role': user.role
+        })
     
     return jsonify({'success': True}), 200
 

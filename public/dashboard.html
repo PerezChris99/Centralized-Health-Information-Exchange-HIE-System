@@ -76,16 +76,28 @@
                                 <span class="visually-hidden">unread notifications</span>
                             </span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end notification-dropdown shadow" aria-labelledby="notificationBell" style="width: 350px; max-height: 400px;">
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown shadow" aria-labelledby="notificationBell" style="width: 350px; max-height: 450px;">
                             <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
                                 <h6 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h6>
-                                <button class="btn btn-link btn-sm text-muted p-0" id="clearAllNotifications">Clear All</button>
+                                <div>
+                                    <button class="btn btn-link btn-sm text-primary p-0 me-2" id="markAllReadBtn" title="Mark All Read">
+                                        <i class="fas fa-check-double"></i>
+                                    </button>
+                                    <button class="btn btn-link btn-sm text-muted p-0" id="clearAllNotifications" title="Clear All">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="notification-list" id="notificationList" style="max-height: 300px; overflow-y: auto;">
                                 <div class="text-center py-4 text-muted" id="noNotifications">
                                     <i class="fas fa-bell-slash fa-2x mb-2"></i>
                                     <p class="mb-0 small">No notifications yet</p>
                                 </div>
+                            </div>
+                            <div class="border-top p-2 text-center">
+                                <a href="#" id="viewAllNotifications" class="text-primary text-decoration-none small">
+                                    <i class="fas fa-list me-1"></i>View All Notifications
+                                </a>
                             </div>
                         </div>
                     </li>
@@ -793,6 +805,54 @@
         </div>
     </div>
 
+    <!-- All Notifications Modal -->
+    <div class="modal fade" id="allNotificationsModal" tabindex="-1" aria-labelledby="allNotificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h5 class="modal-title" id="allNotificationsModalLabel">
+                        <i class="fas fa-bell me-2"></i>All Notifications
+                        <span class="badge bg-light text-primary ms-2" id="modalNotifCount">0</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <!-- Filter Tabs -->
+                    <div class="notification-filter-tabs d-flex border-bottom bg-light">
+                        <button class="notif-filter-btn flex-fill py-2 border-0 bg-transparent active" data-filter="all">
+                            <i class="fas fa-inbox me-1"></i>All
+                        </button>
+                        <button class="notif-filter-btn flex-fill py-2 border-0 bg-transparent" data-filter="unread">
+                            <i class="fas fa-envelope me-1"></i>Unread
+                        </button>
+                        <button class="notif-filter-btn flex-fill py-2 border-0 bg-transparent" data-filter="info">
+                            <i class="fas fa-info-circle me-1"></i>Info
+                        </button>
+                        <button class="notif-filter-btn flex-fill py-2 border-0 bg-transparent" data-filter="success">
+                            <i class="fas fa-check-circle me-1"></i>Success
+                        </button>
+                    </div>
+                    <!-- Notifications List -->
+                    <div id="allNotificationsList" style="max-height: 400px; overflow-y: auto;">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-bell-slash fa-3x mb-3"></i>
+                            <p>No notifications to display</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="modalMarkAllRead">
+                        <i class="fas fa-check-double me-1"></i>Mark All Read
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="modalClearAll">
+                        <i class="fas fa-trash-alt me-1"></i>Clear All
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- External JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
@@ -800,7 +860,7 @@
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
     
     <!-- App JS -->
-    <script src="js/app.js?v=3"></script>
+    <script src="js/app.js?v=10"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>
