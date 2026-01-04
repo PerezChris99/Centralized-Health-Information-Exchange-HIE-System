@@ -49,6 +49,48 @@ def role_required(*roles):
     return decorator
 
 
+@user_bp.route('/search', methods=['GET'])
+@admin_required
+def search_users():
+    """Search users by name or email - Admin only"""
+    query_term = request.args.get('q', '')
+    role_filter = request.args.get('role', '')
+    status_filter = request.args.get('status', '')
+    
+    try:
+        query = User.query
+        
+        # Apply search term filter
+        if query_term:
+            search_pattern = f'%{query_term}%'
+            query = query.filter(
+                (User.name.ilike(search_pattern)) |
+                (User.email.ilike(search_pattern))
+            )
+        
+        # Apply role filter
+        if role_filter:
+            query = query.filter(User.role == role_filter)
+        
+        # Apply status filter (online/offline)
+        if status_filter:
+            if status_filter == 'online':
+                query = query.filter(User.is_online == True)
+            elif status_filter == 'offline':
+                query = query.filter(User.is_online == False)
+        
+        users = query.order_by(User.name).all()
+        
+        return jsonify({
+            'success': True,
+            'count': len(users),
+            'data': [u.to_dict() for u in users]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @user_bp.route('', methods=['GET'])
 @admin_required
 def get_all_users():

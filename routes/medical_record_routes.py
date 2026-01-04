@@ -81,6 +81,73 @@ def create_medical_record():
         return jsonify({'success': False, 'error': str(e)}), 400
 
 
+@medical_record_bp.route('/search', methods=['GET'])
+@jwt_required()
+def search_medical_records():
+    """Search medical records by diagnosis, medications, or notes"""
+    query_term = request.args.get('q', '')
+    category = request.args.get('category', '')
+    
+    if not query_term:
+        return jsonify({'success': False, 'error': 'Search query is required'}), 400
+    
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        # Build base query
+        query = MedicalRecord.query
+        
+        # If patient, only search their own records
+        if user and user.role == 'patient':
+            patient = Patient.query.filter_by(user_id=current_user_id).first()
+            if not patient:
+                return jsonify({'success': True, 'count': 0, 'data': []}), 200
+            query = query.filter_by(patient_id=patient.id)
+        
+        # Search across multiple fields using JSON contains for arrays
+        search_pattern = f'%{query_term}%'
+        
+        # Build search conditions
+        from sqlalchemy import or_, cast, String
+        
+        search_conditions = [
+            MedicalRecord.notes.ilike(search_pattern),
+            cast(MedicalRecord.diagnosis, String).ilike(search_pattern),
+            cast(MedicalRecord.medications, String).ilike(search_pattern),
+            cast(MedicalRecord.lab_results, String).ilike(search_pattern)
+        ]
+        
+        query = query.filter(or_(*search_conditions))
+        
+        # Apply category filter if provided
+        if category:
+            category_conditions = {
+                'diagnosis': cast(MedicalRecord.diagnosis, String).ilike(f'%{query_term}%'),
+                'medications': cast(MedicalRecord.medications, String).ilike(f'%{query_term}%'),
+                'lab_results': cast(MedicalRecord.lab_results, String).ilike(f'%{query_term}%'),
+                'notes': MedicalRecord.notes.ilike(f'%{query_term}%')
+            }
+            if category in category_conditions:
+                query = MedicalRecord.query
+                if user and user.role == 'patient':
+                    patient = Patient.query.filter_by(user_id=current_user_id).first()
+                    if patient:
+                        query = query.filter_by(patient_id=patient.id)
+                query = query.filter(category_conditions[category])
+        
+        records = query.order_by(MedicalRecord.visit_date.desc()).limit(50).all()
+        
+        return jsonify({
+            'success': True,
+            'count': len(records),
+            'data': [r.to_dict() for r in records]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @medical_record_bp.route('', methods=['GET'])
 @jwt_required()
 def get_all_medical_records():

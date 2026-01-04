@@ -74,31 +74,143 @@ def register_patient():
     if not all(k in data for k in required):
         return jsonify({'success': False, 'error': 'Missing required fields'}), 400
     
-    # Check if user already exists
-    if User.query.filter_by(email=data['email']).first():
+    # Check if user already exists (case-insensitive)
+    if User.query.filter(db.func.lower(User.email) == data['email'].strip().lower()).first():
         ActivityLogger.log_auth('patient_register', data['email'], ip_address=ip_address,
                                 details="Registration failed - email already exists", success=False)
         return jsonify({'success': False, 'error': 'Email already registered'}), 400
     
     try:
-        # Create user account first
-        user = User(
-            name=f"{data['firstName']} {data['lastName']}",
-            email=data['email'],
-            role='patient'
-        )
-        user.set_password(data['password'])
-        db.session.add(user)
-        db.session.flush()  # Get user ID without committing
+        # Check if patient records already exist with this email (created by provider)
+        # Use case-insensitive matching for email and get all unlinked patients
+        email_lower = data['email'].strip().lower()
+        existing_patients = Patient.query.filter(
+            db.func.lower(Patient.email) == email_lower,
+            Patient.user_id.is_(None)
+        ).all()
         
-        # Check if patient record already exists with this email
-        existing_patient = Patient.query.filter_by(email=data['email']).first()
+        print(f"DEBUG: Looking for patients with email '{email_lower}', found {len(existing_patients)} unlinked records")
         
-        if existing_patient:
+        matched_patient = None
+        
+        # If no email match, also try matching by name + DOB (common scenario where emails differ)
+        if len(existing_patients) == 0:
+            reg_dob = datetime.strptime(data['dateOfBirth'], '%Y-%m-%d').date()
+            reg_first = data['firstName'].strip().lower()
+            reg_last = data['lastName'].strip().lower()
+            
+            # Look for patients with matching name and DOB that don't have a user yet
+            name_dob_matches = Patient.query.filter(
+                db.func.lower(Patient.first_name) == reg_first,
+                db.func.lower(Patient.last_name) == reg_last,
+                Patient.date_of_birth == reg_dob,
+                Patient.user_id.is_(None)
+            ).all()
+            
+            print(f"DEBUG: No email match. Trying name+DOB match for '{reg_first} {reg_last}' ({reg_dob}), found {len(name_dob_matches)} records")
+            
+            if len(name_dob_matches) == 1:
+                matched_patient = name_dob_matches[0]
+                print(f"DEBUG: Matched patient by name+DOB: ID {matched_patient.id}")
+            elif len(name_dob_matches) > 1:
+                # Multiple matches by name+DOB - unusual but possible (e.g. twins)
+                # Check if any has matching NIN
+                reg_nin = data.get('nin', '').strip().upper() if data.get('nin') else None
+                if reg_nin:
+                    for p in name_dob_matches:
+                        if p.nin and p.nin.strip().upper() == reg_nin:
+                            matched_patient = p
+                            break
+                
+                if not matched_patient:
+                    return jsonify({
+                        'success': False,
+                        'error': f'Found {len(name_dob_matches)} patient records matching your name and date of birth but with different emails. Please contact support to link your account.',
+                        'multiple_name_matches': True,
+                        'match_count': len(name_dob_matches)
+                    }), 400
+        
+        elif len(existing_patients) == 1:
+            # Single match - use it directly
+            matched_patient = existing_patients[0]
+        elif len(existing_patients) > 1:
+            # Multiple matches - need to disambiguate using DOB, name, and optionally NIN
+            reg_dob = datetime.strptime(data['dateOfBirth'], '%Y-%m-%d').date()
+            reg_first = data['firstName'].strip().lower()
+            reg_last = data['lastName'].strip().lower()
+            reg_nin = data.get('nin', '').strip().upper() if data.get('nin') else None
+            
+            # Try to find exact match by DOB + name
+            candidates = []
+            for p in existing_patients:
+                dob_match = p.date_of_birth == reg_dob
+                name_match = (p.first_name.strip().lower() == reg_first and 
+                             p.last_name.strip().lower() == reg_last)
+                nin_match = reg_nin and p.nin and p.nin.strip().upper() == reg_nin
+                
+                if dob_match and name_match:
+                    candidates.append(p)
+                elif nin_match:
+                    # NIN is unique - if it matches, this is definitely the patient
+                    matched_patient = p
+                    break
+            
+            if matched_patient:
+                pass  # Already found by NIN
+            elif len(candidates) == 1:
+                matched_patient = candidates[0]
+            elif len(candidates) > 1:
+                # Still multiple matches after DOB+name - require NIN
+                return jsonify({
+                    'success': False,
+                    'error': 'Multiple patient records found with your information. Please provide your National ID Number (NIN) to verify your identity.',
+                    'requires_nin': True,
+                    'match_count': len(candidates)
+                }), 400
+            else:
+                # No matches by DOB+name - data mismatch
+                return jsonify({
+                    'success': False,
+                    'error': f'Found {len(existing_patients)} patient records with this email but none match your date of birth and name. Please verify your information or contact support.',
+                    'data_mismatch': True,
+                    'match_count': len(existing_patients)
+                }), 400
+        
+        if matched_patient:
+            # Use existing patient's name to ensure consistency with medical records
+            user_name = f"{matched_patient.first_name} {matched_patient.last_name}"
+            
+            # Create user account with patient's existing info
+            user = User(
+                name=user_name,
+                email=data['email'],
+                role='patient'
+            )
+            user.set_password(data['password'])
+            db.session.add(user)
+            db.session.flush()  # Get user ID without committing
+            
             # Link existing patient to new user account
-            existing_patient.user_id = user.id
-            patient = existing_patient
+            matched_patient.user_id = user.id
+            patient = matched_patient
+            
+            # Log that this was a linked account
+            ActivityLogger.log_auth('patient_register', data['email'], user_id=user.id, 
+                                    ip_address=ip_address, 
+                                    details=f"Patient account created and linked to existing patient record ID: {patient.id}. "
+                                           f"Patient data pre-filled from provider registration. "
+                                           f"Matched from {len(existing_patients)} candidate(s).")
         else:
+            # No existing patient - create new user and patient from registration data
+            user = User(
+                name=f"{data['firstName']} {data['lastName']}",
+                email=data['email'],
+                role='patient'
+            )
+            user.set_password(data['password'])
+            db.session.add(user)
+            db.session.flush()  # Get user ID without committing
+            
             # Create new patient record
             patient = Patient(
                 first_name=data['firstName'],
@@ -111,16 +223,20 @@ def register_patient():
                 user_id=user.id
             )
             db.session.add(patient)
+            
+            # Log new patient creation
+            ActivityLogger.log_auth('patient_register', data['email'], user_id=user.id, 
+                                    ip_address=ip_address, 
+                                    details=f"New patient account created, Patient ID: {patient.id}")
         
         db.session.commit()
         
-        # Log successful registration
-        ActivityLogger.log_auth('patient_register', data['email'], user_id=user.id, 
-                                ip_address=ip_address, details=f"Patient account created, Patient ID: {patient.id}")
-        
+        # Return success with info about whether data was pre-filled
         return jsonify({
             'success': True,
-            'message': 'Patient registration successful. Please login to continue.'
+            'message': 'Patient registration successful. Please login to continue.',
+            'linked_existing': matched_patient is not None,
+            'patient_name': f"{patient.first_name} {patient.last_name}" if matched_patient else None
         }), 201
         
     except Exception as e:
@@ -140,8 +256,8 @@ def login():
     if not all(k in data for k in ['email', 'password']):
         return jsonify({'success': False, 'error': 'Please provide email and password'}), 400
     
-    # Find user
-    user = User.query.filter_by(email=data['email']).first()
+    # Find user (case-insensitive email)
+    user = User.query.filter(db.func.lower(User.email) == data['email'].strip().lower()).first()
     
     if not user or not user.check_password(data['password']):
         ActivityLogger.log_auth('login', data['email'], ip_address=ip_address,
@@ -194,7 +310,57 @@ def login():
     patient_info = None
     patient_id = None
     if user.role == 'patient':
+        # First check by user_id (already linked)
         patient = Patient.query.filter_by(user_id=user.id).first()
+        
+        # If not found, check by email (case-insensitive)
+        if not patient:
+            # Get all unlinked patients with this email
+            unlinked_patients = Patient.query.filter(
+                db.func.lower(Patient.email) == user.email.lower(),
+                Patient.user_id.is_(None)
+            ).all()
+            
+            print(f"DEBUG LOGIN: Looking for patients with email '{user.email.lower()}', found {len(unlinked_patients)} unlinked records")
+            
+            if len(unlinked_patients) == 1:
+                # Single match - link it
+                patient = unlinked_patients[0]
+                patient.user_id = user.id
+                db.session.commit()
+                ActivityLogger.log_auth('patient_link', user.email, user_id=user.id, 
+                                        ip_address=ip_address,
+                                        details=f"Auto-linked patient record ID: {patient.id} on login (by email)")
+            elif len(unlinked_patients) == 0:
+                # No email match - try to match by name
+                # Parse user name into first and last name
+                name_parts = user.name.strip().split()
+                if len(name_parts) >= 2:
+                    first_name = name_parts[0].lower()
+                    last_name = ' '.join(name_parts[1:]).lower()
+                    
+                    name_matches = Patient.query.filter(
+                        db.func.lower(Patient.first_name) == first_name,
+                        db.func.lower(Patient.last_name) == last_name,
+                        Patient.user_id.is_(None)
+                    ).all()
+                    
+                    print(f"DEBUG LOGIN: No email match. Trying name match for '{first_name} {last_name}', found {len(name_matches)} records")
+                    
+                    if len(name_matches) == 1:
+                        patient = name_matches[0]
+                        patient.user_id = user.id
+                        db.session.commit()
+                        ActivityLogger.log_auth('patient_link', user.email, user_id=user.id,
+                                                ip_address=ip_address,
+                                                details=f"Auto-linked patient record ID: {patient.id} on login (by name match)")
+            elif len(unlinked_patients) > 1:
+                # Multiple unlinked patients - log this but don't auto-link
+                # User will need to go through verification process
+                ActivityLogger.log_security('multiple_patient_records', user_id=user.id,
+                                            user_email=user.email, ip_address=ip_address,
+                                            details=f"Found {len(unlinked_patients)} unlinked patient records with same email. Manual verification required.")
+        
         if patient:
             patient_info = patient.to_dict()
             patient_id = patient.id
@@ -287,9 +453,36 @@ def get_me():
             'blocked_reason': user.blocked_reason
         }), 403
     
+    # Build response data
+    user_data = user.to_dict()
+    
+    # Add patient_id if user is a patient
+    if user.role == 'patient':
+        # First check by user_id
+        patient = Patient.query.filter_by(user_id=user.id).first()
+        
+        # If not found, check by email (case-insensitive) and link if single match
+        if not patient:
+            unlinked_patients = Patient.query.filter(
+                db.func.lower(Patient.email) == user.email.lower(),
+                Patient.user_id.is_(None)
+            ).all()
+            
+            if len(unlinked_patients) == 1:
+                patient = unlinked_patients[0]
+                # Link the patient to this user
+                patient.user_id = user.id
+                db.session.commit()
+        
+        if patient:
+            user_data['patient_id'] = patient.id
+            user_data['patientId'] = patient.id  # Also include camelCase version
+    
     return jsonify({
         'success': True,
-        'data': user.to_dict()
+        'data': user_data,
+        'patient_id': user_data.get('patient_id'),
+        'patientId': user_data.get('patient_id')
     }), 200
 
 

@@ -493,26 +493,24 @@ async function loadUsers() {
     tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
     
     try {
-        const response = await apiRequest('/users');
-        let users = response.data;
-        
-        // Apply client-side filters
-        const searchTerm = document.getElementById('userSearchInput')?.value?.toLowerCase() || '';
+        // Get filter values
+        const searchTerm = document.getElementById('userSearchInput')?.value || '';
         const roleFilter = document.getElementById('userRoleFilter')?.value || '';
         const statusFilter = document.getElementById('userStatusFilter')?.value || '';
         
-        if (searchTerm) {
-            users = users.filter(u => 
-                u.name.toLowerCase().includes(searchTerm) || 
-                u.email.toLowerCase().includes(searchTerm)
-            );
-        }
-        if (roleFilter) {
-            users = users.filter(u => u.role === roleFilter);
-        }
-        if (statusFilter) {
-            users = users.filter(u => statusFilter === 'online' ? u.is_online : !u.is_online);
-        }
+        // Build query params for database search
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('q', searchTerm);
+        if (roleFilter) params.append('role', roleFilter);
+        if (statusFilter) params.append('status', statusFilter);
+        
+        // Use search endpoint if filters applied, otherwise get all
+        const endpoint = (searchTerm || roleFilter || statusFilter) 
+            ? `/users/search?${params.toString()}` 
+            : '/users';
+        
+        const response = await apiRequest(endpoint);
+        let users = response.data;
         
         document.getElementById('totalUsersCount').textContent = `${users.length} users`;
         
