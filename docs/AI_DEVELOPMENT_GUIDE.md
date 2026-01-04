@@ -123,6 +123,66 @@ project-root/
 | Repository Pattern | `models/` | SQLAlchemy models with `to_dict()` methods |
 | Singleton Logger | `services/logging_service.py` | `ActivityLogger` static methods |
 
+### Coding Standards
+
+> **⚠️ CRITICAL: AI must follow these standards when writing code**
+
+#### No Inline CSS or JavaScript
+
+**Rule:** All CSS and JavaScript must be in separate files, never inline.
+
+| ❌ NOT Allowed | ✅ Required |
+|----------------|-------------|
+| `<div style="color: red;">` | `<div class="error-text">` + CSS file |
+| `<button onclick="doSomething()">` | `<button id="action-btn">` + JS file |
+| `<style>...</style>` in HTML | Link to `css/component.css` |
+| `<script>...</script>` in HTML | Link to `js/component.js` |
+
+**Why This Matters:**
+- **Cleanliness** — HTML files stay focused on structure
+- **Readability** — Easier to find and understand styles/scripts
+- **Maintainability** — Changes in one place affect all uses
+- **Development** — Multiple developers can work on HTML/CSS/JS separately
+- **Caching** — Browsers cache external files, improving performance
+- **Debugging** — Browser dev tools work better with external files
+
+**File Organization:**
+```
+public/
+├── index.html          # HTML structure only
+├── css/
+│   ├── main.css        # Global styles
+│   ├── landing.css     # Landing page specific
+│   ├── auth.css        # Login/register pages
+│   ├── dashboard.css   # Staff dashboard
+│   ├── admin.css       # Admin dashboard
+│   └── patient-dashboard.css
+└── js/
+    ├── app.js          # Core application logic
+    ├── auth.js         # Authentication handling
+    ├── dashboard.js    # Dashboard functionality
+    ├── admin.js        # Admin panel logic
+    └── patient-dashboard.js
+```
+
+**Linking Pattern:**
+```html
+<!-- In the <head> section -->
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/page-specific.css">
+
+<!-- Before closing </body> tag -->
+<script src="js/app.js"></script>
+<script src="js/page-specific.js"></script>
+```
+
+**Cache Busting:**
+When modifying CSS/JS files, update the version parameter in HTML:
+```html
+<link rel="stylesheet" href="css/main.css?v=2">
+<script src="js/app.js?v=2"></script>
+```
+
 ### Integration Points
 
 | Integration | Purpose | Configuration |
