@@ -163,10 +163,14 @@ a:hover {
 .navbar-medical .navbar-brand {
     color: var(--bg-white);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.15rem;
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 0.75rem;
+}
+
+.navbar-medical .navbar-brand i {
+    font-size: 1.1rem;
 }
 
 .navbar-medical .navbar-brand:hover {
@@ -176,12 +180,18 @@ a:hover {
 .navbar-medical .nav-link {
     color: rgba(255, 255, 255, 0.85);
     transition: color var(--transition-fast);
-    font-size: 0.85rem;
-    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem !important;
+    font-weight: 500;
 }
 
 .navbar-medical .nav-link:hover {
     color: var(--bg-white);
+}
+
+.navbar-medical .nav-link i {
+    font-size: 1rem;
+    margin-right: 0.5rem;
 }
 
 .navbar-medical .navbar-toggler {
