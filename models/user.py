@@ -34,6 +34,16 @@ class User(db.Model):
     blocked_reason = db.Column(db.String(500), nullable=True)
     blocked_at = db.Column(db.DateTime, nullable=True)
     blocked_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    blocked_by_name = db.Column(db.String(255), nullable=True)  # Store blocker's name
+    
+    # Unblock tracking (for login notification)
+    was_unblocked = db.Column(db.Boolean, default=False)  # Flag to show unblock notification on next login
+    unblocked_at = db.Column(db.DateTime, nullable=True)
+    unblock_reason = db.Column(db.String(500), nullable=True)  # Resolution reason
+    unblocked_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    unblocked_by_name = db.Column(db.String(255), nullable=True)  # Store unblocker's name
+    original_block_reason = db.Column(db.String(500), nullable=True)  # Original reason for blocking
+    original_blocked_at = db.Column(db.DateTime, nullable=True)  # When they were originally blocked
     
     # Relationships
     appointments = db.relationship('Appointment', back_populates='doctor', lazy='dynamic', foreign_keys='Appointment.doctor_id')
@@ -69,12 +79,12 @@ class User(db.Model):
             data['email'] = self.email
         if include_activity:
             data['is_online'] = self.is_online
-            data['last_login'] = self.last_login.isoformat() if self.last_login else None
-            data['last_logout'] = self.last_logout.isoformat() if self.last_logout else None
-            data['last_activity'] = self.last_activity.isoformat() if self.last_activity else None
+            data['last_login'] = (self.last_login.isoformat() + 'Z') if self.last_login else None
+            data['last_logout'] = (self.last_logout.isoformat() + 'Z') if self.last_logout else None
+            data['last_activity'] = (self.last_activity.isoformat() + 'Z') if self.last_activity else None
             data['session_duration'] = self.session_duration
             data['login_count'] = self.login_count
-            data['blocked_at'] = self.blocked_at.isoformat() if self.blocked_at else None
+            data['blocked_at'] = (self.blocked_at.isoformat() + 'Z') if self.blocked_at else None
         return data
     
     def record_login(self):

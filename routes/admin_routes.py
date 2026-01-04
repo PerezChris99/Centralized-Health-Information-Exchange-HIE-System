@@ -10,13 +10,14 @@ import json
 import csv
 import io
 
-from extensions import db
+from extensions import db, socketio
 from models.user import User
 from models.patient import Patient
 from models.appointment import Appointment
 from models.medical_record import MedicalRecord
 from models.audit_log import AuditLog
 from models.user_session import UserSession
+from models.system_settings import SystemSettings
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -735,6 +736,185 @@ def get_system_health():
         }), 500
 
 
+@admin_bp.route('/system/fix/<action>', methods=['POST'])
+@admin_required
+def apply_system_fix(action):
+    """Apply a fix for a system health issue"""
+    try:
+        current_admin_id = get_jwt_identity()
+        result = {'success': False, 'message': 'Unknown action', 'fixed': 0}
+        
+        if action == 'cleanup_sessions':
+            # Clean up stale sessions (active but no activity in 24+ hours)
+            stale_threshold = datetime.utcnow() - timedelta(hours=24)
+            stale_sessions = UserSession.query.filter(
+                UserSession.is_active == True,
+                UserSession.last_activity < stale_threshold
+            ).all()
+            
+            count = 0
+            for session in stale_sessions:
+                session.is_active = False
+                session.logout_time = datetime.utcnow()
+                count += 1
+            
+            db.session.commit()
+            
+            # Log the action
+            AuditLog.log_action(
+                user_id=current_admin_id,
+                action='system_fix',
+                resource_type='sessions',
+                resource_id=0,
+                details=f"Cleaned up {count} stale session(s)",
+                ip_address=request.remote_addr
+            )
+            
+            result = {
+                'success': True,
+                'message': f'Successfully cleaned up {count} stale session(s)',
+                'fixed': count,
+                'action': action
+            }
+        
+        elif action == 'cleanup_online_status':
+            # Fix ghost users marked online but inactive for 30+ minutes
+            inactive_threshold = datetime.utcnow() - timedelta(minutes=30)
+            ghost_users = User.query.filter(
+                User.is_online == True,
+                User.last_activity < inactive_threshold
+            ).all()
+            
+            count = 0
+            for user in ghost_users:
+                user.is_online = False
+                count += 1
+            
+            db.session.commit()
+            
+            # Log the action
+            AuditLog.log_action(
+                user_id=current_admin_id,
+                action='system_fix',
+                resource_type='users',
+                resource_id=0,
+                details=f"Fixed online status for {count} inactive user(s)",
+                ip_address=request.remote_addr
+            )
+            
+            result = {
+                'success': True,
+                'message': f'Fixed online status for {count} user(s)',
+                'fixed': count,
+                'action': action
+            }
+        
+        elif action == 'cleanup_orphaned_records':
+            # Remove medical records without associated patient
+            orphaned_records = MedicalRecord.query.filter(
+                ~MedicalRecord.patient_id.in_(db.session.query(Patient.id))
+            ).all()
+            
+            count = len(orphaned_records)
+            for record in orphaned_records:
+                db.session.delete(record)
+            
+            db.session.commit()
+            
+            # Log the action
+            AuditLog.log_action(
+                user_id=current_admin_id,
+                action='system_fix',
+                resource_type='medical_records',
+                resource_id=0,
+                details=f"Removed {count} orphaned medical record(s)",
+                ip_address=request.remote_addr
+            )
+            
+            result = {
+                'success': True,
+                'message': f'Removed {count} orphaned medical record(s)',
+                'fixed': count,
+                'action': action
+            }
+        
+        elif action == 'cleanup_orphaned_appointments':
+            # Remove appointments with missing patient or doctor
+            orphaned_appointments = Appointment.query.filter(
+                db.or_(
+                    ~Appointment.patient_id.in_(db.session.query(Patient.id)),
+                    ~Appointment.doctor_id.in_(db.session.query(User.id))
+                )
+            ).all()
+            
+            count = len(orphaned_appointments)
+            for appointment in orphaned_appointments:
+                db.session.delete(appointment)
+            
+            db.session.commit()
+            
+            # Log the action
+            AuditLog.log_action(
+                user_id=current_admin_id,
+                action='system_fix',
+                resource_type='appointments',
+                resource_id=0,
+                details=f"Removed {count} orphaned appointment(s)",
+                ip_address=request.remote_addr
+            )
+            
+            result = {
+                'success': True,
+                'message': f'Removed {count} orphaned appointment(s)',
+                'fixed': count,
+                'action': action
+            }
+        
+        elif action == 'archive_logs':
+            # Archive audit logs older than 90 days by deleting them
+            # In a production system, you'd export to a backup first
+            archive_threshold = datetime.utcnow() - timedelta(days=90)
+            old_logs = AuditLog.query.filter(AuditLog.timestamp < archive_threshold).all()
+            
+            count = len(old_logs)
+            
+            # Delete old logs
+            AuditLog.query.filter(AuditLog.timestamp < archive_threshold).delete()
+            db.session.commit()
+            
+            # Log the action (this log won't be deleted since it's new)
+            AuditLog.log_action(
+                user_id=current_admin_id,
+                action='system_fix',
+                resource_type='audit_logs',
+                resource_id=0,
+                details=f"Archived (deleted) {count} audit log(s) older than 90 days",
+                ip_address=request.remote_addr
+            )
+            
+            result = {
+                'success': True,
+                'message': f'Archived {count} old audit log(s) (older than 90 days)',
+                'fixed': count,
+                'action': action
+            }
+        
+        else:
+            return jsonify({
+                'success': False,
+                'message': f'Unknown action: {action}'
+            }), 400
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Failed to apply fix: {str(e)}'
+        }), 500
+
+
 # ========================
 # User Block/Unblock
 # ========================
@@ -761,10 +941,15 @@ def block_user(user_id):
         data = request.get_json() or {}
         reason = data.get('reason', 'Suspicious activity detected')
         
+        # Get the admin who is blocking
+        blocking_admin = User.query.get(current_admin_id)
+        blocker_name = blocking_admin.name if blocking_admin else 'Administrator'
+        
         user.is_blocked = True
         user.blocked_reason = reason
         user.blocked_at = datetime.utcnow()
         user.blocked_by = current_admin_id
+        user.blocked_by_name = blocker_name
         user.is_online = False  # Force logout
         
         # End all active sessions
@@ -783,6 +968,15 @@ def block_user(user_id):
             details=f"Blocked user {user.name} ({user.email}). Reason: {reason}",
             ip_address=request.remote_addr
         )
+        
+        # Emit real-time notification to the blocked user
+        socketio.emit('account_blocked', {
+            'user_id': user.id,
+            'name': user.name,
+            'reason': reason,
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'blocked_by': blocker_name
+        })
         
         return jsonify({
             'success': True,
@@ -810,10 +1004,30 @@ def unblock_user(user_id):
         if not user.is_blocked:
             return jsonify({'success': False, 'message': 'User is not blocked'}), 400
         
+        # Store previous block details for the unblock notification
+        previous_blocked_reason = user.blocked_reason
+        previous_blocked_at = user.blocked_at
+        previous_blocked_by_name = user.blocked_by_name
+        
+        # Get the admin who is unblocking
+        unblocking_admin = User.query.get(current_admin_id)
+        unblocker_name = unblocking_admin.name if unblocking_admin else 'Administrator'
+        
+        # Clear the block status
         user.is_blocked = False
         user.blocked_reason = None
         user.blocked_at = None
         user.blocked_by = None
+        user.blocked_by_name = None
+        
+        # Set comprehensive unblock tracking for login notification
+        user.was_unblocked = True
+        user.unblocked_at = datetime.utcnow()
+        user.unblock_reason = reason  # Just the resolution reason
+        user.unblocked_by = current_admin_id
+        user.unblocked_by_name = unblocker_name
+        user.original_block_reason = previous_blocked_reason or 'Policy violation'
+        user.original_blocked_at = previous_blocked_at
         
         db.session.commit()
         
@@ -826,6 +1040,15 @@ def unblock_user(user_id):
             details=f"Unblocked user {user.name} ({user.email}). Reason: {reason}",
             ip_address=request.remote_addr
         )
+        
+        # Emit real-time notification to the unblocked user
+        socketio.emit('account_unblocked', {
+            'user_id': user.id,
+            'name': user.name,
+            'reason': reason,
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'unblocked_by': unblocker_name
+        })
         
         return jsonify({
             'success': True,
@@ -1136,3 +1359,127 @@ def time_ago(dt):
         return f"{days} day{'s' if days != 1 else ''} ago"
     else:
         return dt.strftime('%b %d, %Y')
+
+
+# ========================
+# System Settings
+# ========================
+
+@admin_bp.route('/settings', methods=['GET'])
+@admin_required
+def get_system_settings():
+    """Get all system settings"""
+    try:
+        settings = SystemSettings.get_all_settings()
+        
+        # Add default timezone if not set
+        if 'system_timezone' not in settings:
+            settings['system_timezone'] = {
+                'value': 'Africa/Kampala',
+                'description': 'System-wide timezone setting',
+                'updated_at': None
+            }
+        
+        return jsonify({
+            'success': True,
+            'data': settings
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@admin_bp.route('/settings/timezone', methods=['GET'])
+@admin_required
+def get_timezone():
+    """Get the current system timezone"""
+    try:
+        timezone = SystemSettings.get_timezone()
+        return jsonify({
+            'success': True,
+            'data': {
+                'timezone': timezone,
+                'available_timezones': get_common_timezones()
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@admin_bp.route('/settings/timezone', methods=['POST'])
+@admin_required
+def set_timezone():
+    """Set the system timezone"""
+    try:
+        current_admin_id = get_jwt_identity()
+        data = request.get_json()
+        
+        if not data or 'timezone' not in data:
+            return jsonify({'success': False, 'message': 'Timezone is required'}), 400
+        
+        timezone = data['timezone']
+        
+        # Validate timezone
+        valid_timezones = get_common_timezones()
+        if timezone not in [tz['value'] for tz in valid_timezones]:
+            return jsonify({'success': False, 'message': 'Invalid timezone'}), 400
+        
+        SystemSettings.set_timezone(timezone, updated_by=current_admin_id)
+        
+        # Log the action
+        AuditLog.log_action(
+            user_id=current_admin_id,
+            action='update',
+            resource_type='settings',
+            resource_id=0,
+            details=f"Changed system timezone to {timezone}",
+            ip_address=request.remote_addr
+        )
+        
+        # Emit timezone change to all connected clients
+        socketio.emit('timezone_changed', {
+            'timezone': timezone,
+            'timestamp': datetime.utcnow().isoformat() + 'Z'
+        })
+        
+        return jsonify({
+            'success': True,
+            'message': f'System timezone set to {timezone}',
+            'data': {'timezone': timezone}
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+def get_common_timezones():
+    """Get list of common timezones"""
+    return [
+        {'value': 'Africa/Kampala', 'label': 'East Africa Time (EAT) - Kampala', 'offset': '+03:00'},
+        {'value': 'Africa/Nairobi', 'label': 'East Africa Time (EAT) - Nairobi', 'offset': '+03:00'},
+        {'value': 'Africa/Lagos', 'label': 'West Africa Time (WAT) - Lagos', 'offset': '+01:00'},
+        {'value': 'Africa/Cairo', 'label': 'Eastern European Time (EET) - Cairo', 'offset': '+02:00'},
+        {'value': 'Africa/Johannesburg', 'label': 'South Africa Standard Time (SAST)', 'offset': '+02:00'},
+        {'value': 'Europe/London', 'label': 'Greenwich Mean Time (GMT) - London', 'offset': '+00:00'},
+        {'value': 'Europe/Paris', 'label': 'Central European Time (CET) - Paris', 'offset': '+01:00'},
+        {'value': 'Asia/Dubai', 'label': 'Gulf Standard Time (GST) - Dubai', 'offset': '+04:00'},
+        {'value': 'Asia/Kolkata', 'label': 'India Standard Time (IST) - Mumbai', 'offset': '+05:30'},
+        {'value': 'Asia/Singapore', 'label': 'Singapore Standard Time (SGT)', 'offset': '+08:00'},
+        {'value': 'America/New_York', 'label': 'Eastern Time (ET) - New York', 'offset': '-05:00'},
+        {'value': 'America/Chicago', 'label': 'Central Time (CT) - Chicago', 'offset': '-06:00'},
+        {'value': 'America/Los_Angeles', 'label': 'Pacific Time (PT) - Los Angeles', 'offset': '-08:00'},
+        {'value': 'UTC', 'label': 'Coordinated Universal Time (UTC)', 'offset': '+00:00'}
+    ]
+
+
+# Public endpoint for timezone (no auth required)
+@admin_bp.route('/public/timezone', methods=['GET'])
+def get_public_timezone():
+    """Get the current system timezone (public endpoint)"""
+    try:
+        timezone = SystemSettings.get_timezone()
+        return jsonify({
+            'success': True,
+            'data': {'timezone': timezone}
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500

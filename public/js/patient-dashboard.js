@@ -85,10 +85,428 @@
         
         logActivity('view', 'dashboard', 'Patient accessed dashboard');
         
+        // Start activity heartbeat (every 15 seconds) to keep user online status current
+        sendActivityHeartbeat();
+        setInterval(sendActivityHeartbeat, 15000);
+        
+        // Initialize Socket.IO for real-time notifications
+        initializeSocket();
+        
+        // Load system timezone
+        loadSystemTimezone();
+        
+        // Check for unblock notification from login
+        checkUnblockNotification();
+        
         // Play notification sounds 2 seconds after login
         setTimeout(() => {
             playLoginNotifications();
         }, 2000);
+    }
+    
+    // =========================================================================
+    // Unblock Notification on Login & System Timezone
+    // =========================================================================
+    function checkUnblockNotification() {
+        const unblockData = sessionStorage.getItem('hie_unblock_notification');
+        if (unblockData) {
+            try {
+                const data = JSON.parse(unblockData);
+                // Show comprehensive unblock popup after short delay
+                setTimeout(() => {
+                    showUnblockPopup(data);
+                }, 1500);
+                // Clear the notification data
+                sessionStorage.removeItem('hie_unblock_notification');
+            } catch (e) {
+                console.log('Error parsing unblock notification:', e);
+            }
+        }
+    }
+    
+    function showUnblockPopup(data) {
+        // Remove existing if any
+        let overlay = document.getElementById('unblockPopupOverlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        
+        const formatTs = (ts) => {
+            if (!ts) return 'N/A';
+            return new Date(ts).toLocaleString('en-UG', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            });
+        };
+        
+        const blockedAt = formatTs(data.blocked_at);
+        const unblockedAt = formatTs(data.unblocked_at);
+        const blockReason = data.block_reason || 'Policy violation';
+        const resolution = data.resolution || 'Issue has been resolved';
+        const unblockedBy = data.unblocked_by || 'Administrator';
+        
+        overlay = document.createElement('div');
+        overlay.id = 'unblockPopupOverlay';
+        overlay.innerHTML = `
+            <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease-out;">
+                <div style="background: white; border-radius: 20px; max-width: 480px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); overflow: hidden; animation: scaleIn 0.3s ease-out;">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
+                        <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                            <i class="fas fa-check-circle" style="font-size: 32px; color: white;"></i>
+                        </div>
+                        <h2 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 600;">Account Restored</h2>
+                        <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 0.95rem;">Welcome back! Your access has been fully restored.</p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="padding: 24px;">
+                        <!-- Block Details -->
+                        <div style="background: #fef2f2; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                            <h4 style="margin: 0 0 12px; color: #991b1b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <i class="fas fa-ban me-2"></i>Previous Block Details
+                            </h4>
+                            <div style="display: grid; gap: 10px; font-size: 0.9rem; color: #7f1d1d;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #991b1b;"><i class="fas fa-exclamation-triangle me-1"></i> Reason:</span>
+                                    <span style="font-weight: 500; text-align: right; max-width: 60%;">${blockReason}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #991b1b;"><i class="fas fa-clock me-1"></i> Blocked at:</span>
+                                    <span style="font-weight: 500;">${blockedAt}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Unblock Details -->
+                        <div style="background: #ecfdf5; border-radius: 12px; padding: 16px;">
+                            <h4 style="margin: 0 0 12px; color: #065f46; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <i class="fas fa-check-circle me-2"></i>Restoration Details
+                            </h4>
+                            <div style="display: grid; gap: 10px; font-size: 0.9rem; color: #064e3b;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #065f46;"><i class="fas fa-clipboard-check me-1"></i> Resolution:</span>
+                                    <span style="font-weight: 500; text-align: right; max-width: 60%;">${resolution}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #065f46;"><i class="fas fa-user-check me-1"></i> Restored by:</span>
+                                    <span style="font-weight: 500;">${unblockedBy}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #065f46;"><i class="fas fa-clock me-1"></i> Restored at:</span>
+                                    <span style="font-weight: 500;">${unblockedAt}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="padding: 0 24px 24px; text-align: center;">
+                        <button onclick="this.closest('#unblockPopupOverlay').remove()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px 40px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                            <i class="fas fa-thumbs-up me-2"></i>Got it, thanks!
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.9); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Play success sound
+        playAlertSound('unblocked');
+        
+        // Add to notifications
+        addBlockNotificationToList('unblocked', {
+            reason: resolution,
+            timestamp: data.unblocked_at,
+            unblocked_by: unblockedBy
+        });
+    }
+    
+    async function loadSystemTimezone() {
+        try {
+            const response = await fetch('/api/admin/public/timezone');
+            const data = await response.json();
+            if (data.success && data.data.timezone) {
+                localStorage.setItem('hie_system_timezone', data.data.timezone);
+            }
+        } catch (e) {
+            // Use cached or default
+        }
+    }
+
+    // =========================================================================
+    // Socket.IO for Real-Time Notifications
+    // =========================================================================
+    let socket = null;
+    
+    function initializeSocket() {
+        if (typeof io !== 'undefined') {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Patient socket connected');
+            });
+            
+            // Listen for account blocked event - auto logout after 1 second
+            socket.on('account_blocked', (data) => {
+                const user = JSON.parse(localStorage.getItem(AUTH_CONFIG.USER_KEY) || '{}');
+                if (data.user_id === user.id) {
+                    showBlockedNotification(data);
+                    // Auto logout after 1 second delay
+                    setTimeout(() => {
+                        logout();
+                    }, 1000);
+                }
+            });
+            
+            // Listen for account unblocked event
+            socket.on('account_unblocked', (data) => {
+                const user = JSON.parse(localStorage.getItem(AUTH_CONFIG.USER_KEY) || '{}');
+                if (data.user_id === user.id) {
+                    showUnblockedNotification(data);
+                }
+            });
+            
+            // Listen for timezone changes
+            socket.on('timezone_changed', (data) => {
+                if (data.timezone) {
+                    localStorage.setItem('hie_system_timezone', data.timezone);
+                    showToast('Timezone Updated', `System timezone changed to ${data.timezone}`, 'info');
+                }
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Patient socket disconnected');
+            });
+        }
+    }
+    
+    function showBlockedNotification(data) {
+        // Remove existing if any
+        let container = document.getElementById('persistentNotificationContainer');
+        if (container) {
+            container.remove();
+        }
+        
+        const formatTs = (ts) => {
+            if (!ts) return 'Just now';
+            return new Date(ts).toLocaleString('en-UG', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            });
+        };
+        
+        const timestamp = formatTs(data.timestamp);
+        
+        container = document.createElement('div');
+        container.id = 'persistentNotificationContainer';
+        container.innerHTML = `
+            <div style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 420px; min-width: 340px; animation: slideInRight 0.4s ease-out;">
+                <div style="background: linear-gradient(135deg, #fff 0%, #f8fafc 100%); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05); overflow: hidden; border-left: 5px solid #ef4444;">
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 16px 20px 12px; border-bottom: 1px solid #e5e7eb;">
+                        <i class="fas fa-ban" style="color: #ef4444; font-size: 1.25rem;"></i>
+                        <span style="flex: 1; font-weight: 600; font-size: 1rem; color: #1f2937;">Account Blocked</span>
+                    </div>
+                    <div style="padding: 16px 20px 20px;">
+                        <p style="margin: 0; font-size: 0.95rem; color: #374151; line-height: 1.5;"><strong>Your account has been blocked.</strong></p>
+                        <div style="margin-top: 12px; padding: 12px; background: #fef2f2; border-radius: 10px; font-size: 0.85rem; color: #991b1b;">
+                            <div style="margin-bottom: 8px;"><i class="fas fa-exclamation-triangle me-1"></i> <strong>Reason:</strong> ${data.reason || 'Suspicious activity detected'}</div>
+                            <div style="margin-bottom: 8px;"><i class="fas fa-user-shield me-1"></i> <strong>Blocked by:</strong> ${data.blocked_by || 'Administrator'}</div>
+                            <div><i class="fas fa-clock me-1"></i> <strong>Time:</strong> ${timestamp}</div>
+                        </div>
+                        <div style="margin-top: 12px; padding: 10px; background: #fee2e2; border-radius: 8px; text-align: center; font-size: 0.8rem; color: #b91c1c;">
+                            <i class="fas fa-sign-out-alt me-1"></i> You will be logged out automatically...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(container);
+        
+        // Add to notifications list
+        addBlockNotificationToList('blocked', data);
+        
+        // Play alert sound
+        playAlertSound('blocked');
+    }
+    
+    function showUnblockedNotification(data) {
+        // Remove existing if any
+        let container = document.getElementById('persistentNotificationContainer');
+        if (container) {
+            container.remove();
+        }
+        
+        const formatTs = (ts) => {
+            if (!ts) return 'Just now';
+            return new Date(ts).toLocaleString('en-UG', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            });
+        };
+        
+        const timestamp = formatTs(data.timestamp);
+        
+        container = document.createElement('div');
+        container.id = 'persistentNotificationContainer';
+        container.innerHTML = `
+            <div style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 420px; min-width: 340px; animation: slideInRight 0.4s ease-out;">
+                <div style="background: linear-gradient(135deg, #fff 0%, #f8fafc 100%); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05); overflow: hidden; border-left: 5px solid #10b981;">
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 16px 20px 12px; border-bottom: 1px solid #e5e7eb;">
+                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.25rem;"></i>
+                        <span style="flex: 1; font-weight: 600; font-size: 1rem; color: #1f2937;">Account Restored</span>
+                        <button onclick="this.closest('#persistentNotificationContainer').remove()" style="background: none; border: none; font-size: 1.5rem; color: #9ca3af; cursor: pointer; padding: 0; width: 32px; height: 32px;">&times;</button>
+                    </div>
+                    <div style="padding: 16px 20px 20px;">
+                        <p style="margin: 0; font-size: 0.95rem; color: #374151; line-height: 1.5;"><strong>Good news!</strong> Your account access has been restored.</p>
+                        <div style="margin-top: 12px; padding: 12px; background: #ecfdf5; border-radius: 10px; font-size: 0.85rem; color: #065f46;">
+                            <div style="margin-bottom: 8px;"><i class="fas fa-check me-1"></i> <strong>Resolution:</strong> ${data.reason || 'Issue resolved'}</div>
+                            <div><i class="fas fa-user-check me-1"></i> <strong>Restored by:</strong> ${data.unblocked_by || 'Administrator'}</div>
+                        </div>
+                        <div style="padding: 12px; background: #f9fafb; border-radius: 10px; font-size: 0.85rem; color: #6b7280; margin-top: 10px;">
+                            <span><i class="fas fa-clock me-1"></i> ${timestamp}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(container);
+        
+        // Add to notifications list
+        addBlockNotificationToList('unblocked', data);
+        
+        // Play success sound
+        playAlertSound('unblocked');
+    }
+    
+    function addBlockNotificationToList(type, data) {
+        const isBlocked = type === 'blocked';
+        const newNotification = {
+            id: `${type}-${Date.now()}`,
+            type: isBlocked ? 'error' : 'success',
+            title: isBlocked ? 'Account Blocked' : 'Account Restored',
+            message: isBlocked 
+                ? `Your account was blocked. Reason: ${data.reason || 'Suspicious activity'}`
+                : `Your account access has been restored. ${data.reason || ''}`,
+            time: data.timestamp || new Date().toISOString(),
+            read: false,
+            navigateTo: 'overview',
+            actionText: 'View Details',
+            persistent: true
+        };
+        
+        // Add to beginning of notifications
+        state.notifications.unshift(newNotification);
+        
+        // Save to localStorage
+        saveNotifications();
+        
+        // Re-render notifications
+        renderNotifications();
+        renderNotificationsPage();
+    }
+    
+    function playAlertSound(type) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            if (type === 'blocked') {
+                // Warning/alert sound - descending tone
+                oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+                oscillator.frequency.setValueAtTime(400, ctx.currentTime + 0.15);
+                oscillator.frequency.setValueAtTime(300, ctx.currentTime + 0.3);
+            } else {
+                // Success sound - ascending tone
+                oscillator.frequency.setValueAtTime(400, ctx.currentTime);
+                oscillator.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(800, ctx.currentTime + 0.2);
+            }
+            
+            gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+            
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + 0.4);
+        } catch (e) {
+            console.log('Sound not supported:', e);
+        }
+    }
+    
+    function formatDateTime(dateStr) {
+        if (!dateStr) return 'N/A';
+        const tz = localStorage.getItem('hie_system_timezone') || 'Africa/Kampala';
+        try {
+            return new Date(dateStr).toLocaleString('en-UG', {
+                timeZone: tz,
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+        } catch (e) {
+            return new Date(dateStr).toLocaleString('en-UG', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+        }
+    }
+
+    // =========================================================================
+    // Activity Heartbeat - Keep user online status current
+    // =========================================================================
+    async function sendActivityHeartbeat() {
+        const token = getAuthToken();
+        if (!token) return;
+        
+        try {
+            await fetch('/api/auth/activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        } catch (e) {
+            // Silently fail - heartbeat is non-critical
+        }
     }
 
     // =========================================================================
@@ -1724,6 +2142,7 @@
             clearAllBtn.addEventListener('click', () => {
                 if (confirm('Are you sure you want to clear all notifications?')) {
                     state.notifications = [];
+                    saveNotifications();
                     renderNotifications();
                     renderNotificationsPage();
                 }
@@ -1744,10 +2163,56 @@
         loadNotifications();
     }
 
+    const NOTIFICATIONS_STORAGE_KEY = 'hie_patient_notifications';
+    
+    function loadStoredNotifications() {
+        try {
+            const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Error loading stored notifications:', e);
+        }
+        return [];
+    }
+    
+    function saveNotifications() {
+        try {
+            // Keep only last 50 notifications
+            const toSave = state.notifications.slice(0, 50);
+            localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(toSave));
+        } catch (e) {
+            console.error('Error saving notifications:', e);
+        }
+    }
+
     async function loadNotifications() {
         try {
-            // Generate notifications based on appointments and other data
-            const notifications = [];
+            // Load stored notifications first
+            const storedNotifications = loadStoredNotifications();
+            console.log('Stored notifications:', storedNotifications.length);
+            
+            // Generate new notifications based on appointments and other data
+            const newNotifications = [];
+            
+            // Always add a welcome/info notification if none exist
+            const hasWelcome = storedNotifications.some(n => n.id && n.id.startsWith('welcome-'));
+            const lastLoginNotif = sessionStorage.getItem('loginNotificationShown');
+            
+            if (!hasWelcome && !lastLoginNotif) {
+                newNotifications.push({
+                    id: 'welcome-' + Date.now(),
+                    type: 'info',
+                    title: 'Welcome Back!',
+                    message: 'You are now logged in to your patient portal. Check your appointments and medical records.',
+                    time: new Date().toISOString(),
+                    read: false,
+                    navigateTo: 'overview',
+                    actionText: 'Go to Dashboard'
+                });
+                sessionStorage.setItem('loginNotificationShown', 'true');
+            }
             
             // Check upcoming appointments
             if (state.appointments && state.appointments.length > 0) {
@@ -1762,23 +2227,26 @@
                     const daysUntil = Math.ceil((aptDate - now) / (1000 * 60 * 60 * 24));
                     
                     if (daysUntil <= 3) {
-                        notifications.push({
-                            id: `apt-${apt.id}`,
-                            type: 'appointment',
-                            title: 'Upcoming Appointment',
-                            message: daysUntil === 0 
-                                ? `You have an appointment today with ${apt.provider_name || 'your provider'}` 
-                                : daysUntil === 1 
-                                    ? `Appointment tomorrow with ${apt.provider_name || 'your provider'}`
-                                    : `Appointment in ${daysUntil} days`,
-                            time: new Date().toISOString(),
-                            read: false,
-                            // Navigation target
-                            navigateTo: 'appointments',
-                            actionText: 'View Appointments',
-                            appointmentId: apt.id,
-                            appointmentDate: apt.date || apt.appointment_date
-                        });
+                        const notifId = `apt-${apt.id}`;
+                        // Only add if not already in stored notifications
+                        if (!storedNotifications.find(n => n.id === notifId)) {
+                            newNotifications.push({
+                                id: notifId,
+                                type: 'appointment',
+                                title: 'Upcoming Appointment',
+                                message: daysUntil === 0 
+                                    ? `You have an appointment today with ${apt.provider_name || 'your provider'}` 
+                                    : daysUntil === 1 
+                                        ? `Appointment tomorrow with ${apt.provider_name || 'your provider'}`
+                                        : `Appointment in ${daysUntil} days`,
+                                time: new Date().toISOString(),
+                                read: false,
+                                navigateTo: 'appointments',
+                                actionText: 'View Appointments',
+                                appointmentId: apt.id,
+                                appointmentDate: apt.date || apt.appointment_date
+                            });
+                        }
                     }
                 });
             }
@@ -1794,35 +2262,23 @@
                 
                 recentRecords.forEach((record, index) => {
                     if (index < 2) { // Limit to 2 recent record notifications
-                        notifications.push({
-                            id: `record-${record.id}`,
-                            type: 'record',
-                            title: 'New Medical Record',
-                            message: `New record added: ${record.diagnosis || 'Medical Visit'}`,
-                            time: record.visit_date || record.visitDate || record.date || record.created_at,
-                            read: false,
-                            navigateTo: 'records',
-                            actionText: 'View Records',
-                            recordId: record.id
-                        });
+                        const notifId = `record-${record.id}`;
+                        // Only add if not already in stored notifications
+                        if (!storedNotifications.find(n => n.id === notifId)) {
+                            newNotifications.push({
+                                id: notifId,
+                                type: 'record',
+                                title: 'New Medical Record',
+                                message: `New record added: ${record.diagnosis || 'Medical Visit'}`,
+                                time: record.visit_date || record.visitDate || record.date || record.created_at,
+                                read: false,
+                                navigateTo: 'records',
+                                actionText: 'View Records',
+                                recordId: record.id
+                            });
+                        }
                     }
                 });
-            }
-            
-            // Welcome notification for new session
-            const lastLoginNotif = sessionStorage.getItem('loginNotificationShown');
-            if (!lastLoginNotif) {
-                notifications.unshift({
-                    id: 'welcome-' + Date.now(),
-                    type: 'info',
-                    title: 'Welcome Back!',
-                    message: 'You are now logged in to your patient portal. Check your appointments and medical records.',
-                    time: new Date().toISOString(),
-                    read: false,
-                    navigateTo: 'overview',
-                    actionText: 'Go to Dashboard'
-                });
-                sessionStorage.setItem('loginNotificationShown', 'true');
             }
             
             // Profile completion reminder
@@ -1835,20 +2291,56 @@
                 if (!p.nextOfKinName && !p.next_of_kin_name) missingFields.push('emergency contact');
                 
                 if (missingFields.length > 0) {
-                    notifications.push({
-                        id: 'profile-incomplete',
-                        type: 'warning',
-                        title: 'Complete Your Profile',
-                        message: `Add your ${missingFields.slice(0, 2).join(', ')} for better healthcare service.`,
-                        time: new Date().toISOString(),
-                        read: false,
-                        navigateTo: 'profile',
-                        actionText: 'Update Profile'
-                    });
+                    const notifId = 'profile-incomplete';
+                    // Only add if not already in stored notifications or it's been read
+                    const existingProfile = storedNotifications.find(n => n.id === notifId);
+                    if (!existingProfile || existingProfile.read) {
+                        // Remove old one if it was read
+                        const filteredStored = storedNotifications.filter(n => n.id !== notifId);
+                        storedNotifications.length = 0;
+                        storedNotifications.push(...filteredStored);
+                        
+                        if (!existingProfile) {
+                            newNotifications.push({
+                                id: notifId,
+                                type: 'warning',
+                                title: 'Complete Your Profile',
+                                message: `Add your ${missingFields.slice(0, 2).join(', ')} for better healthcare service.`,
+                                time: new Date().toISOString(),
+                                read: false,
+                                navigateTo: 'profile',
+                                actionText: 'Update Profile'
+                            });
+                        }
+                    }
                 }
             }
             
-            state.notifications = notifications;
+            // Merge: new notifications first, then stored (preserving read status from stored)
+            state.notifications = [...newNotifications, ...storedNotifications];
+            
+            // If still no notifications, add a default info notification
+            if (state.notifications.length === 0) {
+                state.notifications.push({
+                    id: 'default-info-' + Date.now(),
+                    type: 'info',
+                    title: 'Stay Informed',
+                    message: 'You will receive notifications about your appointments, medical records, and important updates here.',
+                    time: new Date().toISOString(),
+                    read: false,
+                    navigateTo: 'overview',
+                    actionText: 'Go to Dashboard'
+                });
+            }
+            
+            // Sort by time (newest first)
+            state.notifications.sort((a, b) => new Date(b.time) - new Date(a.time));
+            
+            console.log('Final notifications count:', state.notifications.length);
+            
+            // Save merged notifications
+            saveNotifications();
+            
             renderNotifications();
             renderNotificationsPage();
             
@@ -1935,7 +2427,12 @@
         const list = document.getElementById('notificationsPageList');
         const countEl = document.getElementById('allNotifCount');
         
-        if (!list) return;
+        if (!list) {
+            console.log('Notifications page list element not found');
+            return;
+        }
+        
+        console.log('Rendering notifications page. Total notifications:', state.notifications.length);
         
         // Filter notifications
         let filteredNotifications = [...state.notifications];
@@ -2051,6 +2548,7 @@
 
     function dismissNotification(id) {
         state.notifications = state.notifications.filter(n => n.id !== id);
+        saveNotifications();
         renderNotifications();
         renderNotificationsPage();
     }
@@ -2083,13 +2581,16 @@
         const notification = state.notifications.find(n => n.id === id);
         if (notification) {
             notification.read = true;
+            saveNotifications();
             renderNotifications();
         }
     }
 
     function markAllNotificationsRead() {
         state.notifications.forEach(n => n.read = true);
+        saveNotifications();
         renderNotifications();
+        renderNotificationsPage();
     }
 
     function escapeHtml(text) {
@@ -2099,36 +2600,61 @@
     }
 
     function playLoginNotifications() {
-        const unreadCount = state.notifications.filter(n => !n.read).length;
+        // Only play sounds once per session (use same key as app.js to prevent double-playing)
+        const sessionKey = 'hie_login_sounds_played';
+        if (sessionStorage.getItem(sessionKey)) return;
         
-        if (unreadCount > 0) {
-            // Play sound for each notification with 500ms delay between each
-            let soundsPlayed = 0;
-            const playNextSound = () => {
-                if (soundsPlayed < unreadCount && soundsPlayed < 5) { // Max 5 sounds
-                    notificationSound.play();
-                    soundsPlayed++;
-                    setTimeout(playNextSound, 500);
-                }
-            };
-            playNextSound();
-        }
+        // Mark as played immediately to prevent double-playing
+        sessionStorage.setItem(sessionKey, 'true');
+        
+        // Small delay to ensure notifications are loaded
+        setTimeout(() => {
+            const unreadCount = state.notifications.filter(n => !n.read).length;
+            
+            if (unreadCount > 0) {
+                // Play sound for each notification with 500ms delay between each
+                let soundsPlayed = 0;
+                const playNextSound = () => {
+                    if (soundsPlayed < unreadCount && soundsPlayed < 5) { // Max 5 sounds
+                        notificationSound.play();
+                        soundsPlayed++;
+                        setTimeout(playNextSound, 500);
+                    }
+                };
+                playNextSound();
+            } else {
+                // Always play at least a welcome sound for non-admin users
+                notificationSound.play();
+            }
+        }, 500);
     }
 
     // Add new notification
-    function addNotification(type, title, message) {
+    function addNotification(type, title, message, options = {}) {
         const notification = {
-            id: 'notif-' + Date.now(),
+            id: options.id || 'notif-' + Date.now(),
             type: type,
             title: title,
             message: message,
             time: new Date().toISOString(),
-            read: false
+            read: false,
+            navigateTo: options.navigateTo || null,
+            actionText: options.actionText || null
         };
         
         state.notifications.unshift(notification);
+        saveNotifications();
         renderNotifications();
+        renderNotificationsPage();
         notificationSound.play();
+    }
+    
+    // Close persistent notification
+    function closePersistentNotification() {
+        const notification = document.getElementById('persistentNotification');
+        if (notification) {
+            notification.style.display = 'none';
+        }
     }
 
     // Expose for external use
@@ -2136,5 +2662,8 @@
         add: addNotification,
         refresh: loadNotifications
     };
+    
+    // Expose close function globally for onclick
+    window.closePersistentNotification = closePersistentNotification;
 
 })();

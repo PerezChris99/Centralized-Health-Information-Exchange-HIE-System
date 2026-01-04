@@ -249,3 +249,128 @@
     50% { transform: rotate(-15deg); }
     75% { transform: rotate(10deg); }
 }
+
+/* Notification Modal Styles */
+.notif-filter-btn {
+    font-size: 0.85rem;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.notif-filter-btn:hover {
+    background-color: #e9ecef !important;
+    color: #0d6efd;
+}
+
+.notif-filter-btn.active {
+    color: #0d6efd;
+    border-bottom: 2px solid #0d6efd !important;
+    font-weight: 600;
+}
+
+.modal-notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modal-notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.modal-notification-item.unread {
+    background-color: #f0f7ff;
+    border-left: 4px solid #0d6efd;
+}
+
+.modal-notification-item.unread:hover {
+    background-color: #e3f0ff;
+}
+
+.modal-notif-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.modal-notif-icon.info { background-color: #e7f1ff; color: #0d6efd; }
+.modal-notif-icon.success { background-color: #d4edda; color: #198754; }
+.modal-notif-icon.warning { background-color: #fff3cd; color: #ffc107; }
+.modal-notif-icon.danger, .modal-notif-icon.error { background-color: #f8d7da; color: #dc3545; }
+.modal-notif-icon.appointment { background-color: #e0cffc; color: #6f42c1; }
+.modal-notif-icon.record { background-color: #d1e7dd; color: #198754; }
+
+.modal-notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-notif-title {
+    font-weight: 600;
+    color: #212529;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.modal-notif-message {
+    color: #6c757d;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.modal-notif-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: #adb5bd;
+}
+
+.modal-notif-time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal-notif-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.modal-notif-actions .btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+.no-notifications-modal {
+    text-align: center;
+    padding: 60px 20px;
+    color: #adb5bd;
+}
+
+.no-notifications-modal i {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+}
+
+.no-notifications-modal h4 {
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.no-notifications-modal p {
+    color: #adb5bd;
+    font-size: 0.9rem;
+}

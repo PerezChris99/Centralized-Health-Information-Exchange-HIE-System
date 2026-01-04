@@ -13,6 +13,9 @@ let authToken = null;
 let currentUser = null;
 let charts = {};
 let refreshInterval = null;
+let userRefreshInterval = null;
+let heartbeatInterval = null;
+let socket = null;
 
 // ================================
 // Initialization
@@ -34,11 +37,124 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dashboard
     initializeNavigation();
     initializeEventListeners();
+    initializeSocket();
     loadAllData();
     
-    // Auto-refresh every 30 seconds
+    // Start activity heartbeat (every 15 seconds) to keep admin online status current
+    sendActivityHeartbeat();
+    heartbeatInterval = setInterval(sendActivityHeartbeat, 15000);
+    
+    // Auto-refresh full data every 30 seconds
     refreshInterval = setInterval(loadLiveData, 30000);
+    
+    // Refresh user lists more frequently (every 10 seconds) for real-time feel
+    userRefreshInterval = setInterval(() => {
+        loadOnlineUsers();
+        loadOfflineUsers();
+    }, 10000);
 });
+
+// ================================
+// Activity Heartbeat - Keep admin online status current
+// ================================
+async function sendActivityHeartbeat() {
+    if (!authToken) return;
+    
+    try {
+        await fetch('/api/auth/activity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+    } catch (e) {
+        // Silently fail - heartbeat is non-critical
+    }
+}
+
+// ================================
+// Socket.IO for Real-Time Updates
+// ================================
+function initializeSocket() {
+    // Connect to Socket.IO
+    if (typeof io !== 'undefined') {
+        socket = io();
+        
+        socket.on('connect', () => {
+            console.log('Admin socket connected');
+        });
+        
+        // Listen for user login events
+        socket.on('user_login', (data) => {
+            console.log('User logged in:', data);
+            showToast('User Online', `${data.name} just logged in`, 'success');
+            // Refresh user lists immediately
+            loadOnlineUsers();
+            loadOfflineUsers();
+            loadActivityFeed();
+        });
+        
+        // Listen for user logout events
+        socket.on('user_logout', (data) => {
+            console.log('User logged out:', data);
+            showToast('User Offline', `${data.name} just logged out`, 'info');
+            // Refresh user lists immediately
+            loadOnlineUsers();
+            loadOfflineUsers();
+            loadActivityFeed();
+        });
+        
+        // Listen for real-time activity updates
+        socket.on('user_activity', (data) => {
+            // Update the "Active X ago" text for this user in real-time
+            updateUserActivityDisplay(data.user_id, data.last_activity);
+        });
+        
+        // Listen for patient events
+        socket.on('patient_created', () => loadLiveData());
+        socket.on('patient_updated', () => loadLiveData());
+        socket.on('patient_deleted', () => loadLiveData());
+        
+        // Listen for timezone changes
+        socket.on('timezone_changed', (data) => {
+            if (data.timezone) {
+                localStorage.setItem('hie_system_timezone', data.timezone);
+                showToast('Timezone Updated', `System timezone changed to ${data.timezone}`, 'info');
+                // Update timezone display if on settings page
+                const tzDisplay = document.getElementById('currentTimezone');
+                if (tzDisplay) {
+                    tzDisplay.textContent = data.timezone;
+                }
+            }
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('Admin socket disconnected');
+        });
+    }
+}
+
+// Update user activity display without full reload
+function updateUserActivityDisplay(userId, lastActivity) {
+    // Update in online users list
+    const userItem = document.querySelector(`[data-user-id="${userId}"]`);
+    if (userItem) {
+        const activityText = userItem.querySelector('.text-muted');
+        if (activityText && activityText.textContent.includes('Active')) {
+            activityText.textContent = `Active ${formatTimeAgo(lastActivity)}`;
+        }
+    }
+    
+    // Update in users table
+    const tableRow = document.querySelector(`#usersTableBody tr[data-user-id="${userId}"]`);
+    if (tableRow) {
+        const activityCell = tableRow.querySelector('.user-last-activity');
+        if (activityCell) {
+            activityCell.textContent = formatTimeAgo(lastActivity);
+        }
+    }
+}
 
 // ================================
 // Navigation & Sections
@@ -202,11 +318,54 @@ async function loadAllData() {
             loadChartData(),
             loadOnlineUsers(),
             loadOfflineUsers(),
-            loadActivityFeed()
+            loadActivityFeed(),
+            loadSystemTimezone()
         ]);
     } catch (error) {
         console.error('Error loading data:', error);
         showToast('Error', 'Failed to load some data', 'error');
+    }
+}
+
+async function loadSystemTimezone() {
+    try {
+        const response = await apiRequest('/settings/timezone');
+        if (response.success && response.data) {
+            localStorage.setItem('hie_system_timezone', response.data.timezone);
+            // Update timezone display if element exists
+            const tzDisplay = document.getElementById('currentTimezone');
+            if (tzDisplay) {
+                tzDisplay.textContent = response.data.timezone;
+            }
+            // Populate timezone select if exists
+            const tzSelect = document.getElementById('timezoneSelect');
+            if (tzSelect && response.data.available_timezones) {
+                tzSelect.innerHTML = response.data.available_timezones.map(tz => 
+                    `<option value="${tz.value}" ${tz.value === response.data.timezone ? 'selected' : ''}>${tz.label}</option>`
+                ).join('');
+            }
+        }
+    } catch (error) {
+        console.log('Could not load timezone settings:', error);
+    }
+}
+
+async function saveTimezone() {
+    const tzSelect = document.getElementById('timezoneSelect');
+    if (!tzSelect) return;
+    
+    const timezone = tzSelect.value;
+    
+    try {
+        const response = await apiRequest('/settings/timezone', 'POST', { timezone });
+        if (response.success) {
+            showToast('Success', `Timezone set to ${timezone}`, 'success');
+            localStorage.setItem('hie_system_timezone', timezone);
+        } else {
+            showToast('Error', response.message || 'Failed to save timezone', 'error');
+        }
+    } catch (error) {
+        showToast('Error', 'Failed to save timezone', 'error');
     }
 }
 
@@ -227,7 +386,49 @@ async function loadLiveData() {
 function updateLastRefresh() {
     const now = new Date().toLocaleTimeString();
     document.getElementById('lastRefresh').textContent = now;
+    
+    // Also update the settings page time display if visible
+    updateSettingsTimeDisplay();
 }
+
+function updateSettingsTimeDisplay() {
+    const timeDisplay = document.getElementById('currentTimeDisplay');
+    const dateDisplay = document.getElementById('currentDateDisplay');
+    
+    if (timeDisplay && dateDisplay) {
+        const tz = localStorage.getItem('hie_system_timezone') || 'Africa/Kampala';
+        const now = new Date();
+        
+        try {
+            timeDisplay.textContent = now.toLocaleTimeString('en-UG', {
+                timeZone: tz,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            
+            dateDisplay.textContent = now.toLocaleDateString('en-UG', {
+                timeZone: tz,
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }) + ` (${tz})`;
+        } catch (e) {
+            timeDisplay.textContent = now.toLocaleTimeString('en-UG');
+            dateDisplay.textContent = now.toLocaleDateString('en-UG', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    }
+}
+
+// Start time display update interval
+setInterval(updateSettingsTimeDisplay, 1000);
 
 // ================================
 // Overview Statistics
@@ -520,7 +721,7 @@ async function loadUsers() {
         }
         
         tbody.innerHTML = users.map(user => `
-            <tr>
+            <tr data-user-id="${user.id}">
                 <td>
                     <div class="d-flex align-items-center">
                         <div class="user-avatar ${user.role === 'admin' ? 'admin' : ''}">
@@ -537,7 +738,7 @@ async function loadUsers() {
                     </span>
                 </td>
                 <td>${user.last_login ? formatDateTime(user.last_login) : 'Never'}</td>
-                <td>${user.last_activity ? formatTimeAgo(user.last_activity) : 'N/A'}</td>
+                <td class="user-last-activity">${user.last_activity ? formatTimeAgo(user.last_activity) : 'N/A'}</td>
                 <td>${formatDuration(user.session_duration || 0)}</td>
                 <td><span class="badge bg-secondary">${user.login_count || 0}</span></td>
             </tr>
@@ -935,7 +1136,133 @@ function renderSystemIssues(issues, warnings) {
 }
 
 async function handleSystemAction(action) {
-    showToast('Info', `Action "${action}" would be executed here. Implement cleanup endpoints as needed.`, 'info');
+    // Show loading state
+    const buttons = document.querySelectorAll(`button[onclick="handleSystemAction('${action}')"]`);
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Applying...';
+    });
+    
+    try {
+        const response = await apiRequest(`/system/fix/${action}`, {
+            method: 'POST'
+        });
+        
+        if (response.success) {
+            // Show success notification
+            showFixSuccessPopup(response.message, response.fixed);
+            
+            // Reload system health to refresh the issues list
+            await loadSystemHealth();
+        } else {
+            showToast('Error', response.message || 'Failed to apply fix', 'danger');
+            // Re-enable buttons
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-tools me-1"></i>Apply Fix';
+            });
+        }
+    } catch (error) {
+        console.error('Error applying fix:', error);
+        showToast('Error', 'Failed to apply fix. Please try again.', 'danger');
+        // Re-enable buttons
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-tools me-1"></i>Apply Fix';
+        });
+    }
+}
+
+function showFixSuccessPopup(message, fixedCount) {
+    // Remove any existing popup
+    const existing = document.getElementById('fixSuccessPopup');
+    if (existing) existing.remove();
+    
+    const popup = document.createElement('div');
+    popup.id = 'fixSuccessPopup';
+    popup.className = 'fix-success-popup';
+    popup.innerHTML = `
+        <div class="fix-success-content">
+            <div class="fix-success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h4>Fix Applied Successfully!</h4>
+            <p>${escapeHtml(message)}</p>
+            ${fixedCount > 0 ? `<span class="fix-count">${fixedCount} item${fixedCount !== 1 ? 's' : ''} fixed</span>` : ''}
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Add styles if not present
+    if (!document.getElementById('fixPopupStyles')) {
+        const styles = document.createElement('style');
+        styles.id = 'fixPopupStyles';
+        styles.textContent = `
+            .fix-success-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0.8);
+                background: white;
+                padding: 30px 40px;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                z-index: 99999;
+                text-align: center;
+                opacity: 0;
+                animation: fixPopupIn 0.3s ease forwards;
+            }
+            @keyframes fixPopupIn {
+                from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            }
+            @keyframes fixPopupOut {
+                from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            }
+            .fix-success-icon {
+                width: 70px;
+                height: 70px;
+                background: linear-gradient(135deg, #28a745, #20c997);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+            }
+            .fix-success-icon i {
+                font-size: 35px;
+                color: white;
+            }
+            .fix-success-content h4 {
+                color: #28a745;
+                margin-bottom: 10px;
+            }
+            .fix-success-content p {
+                color: #6c757d;
+                margin-bottom: 10px;
+            }
+            .fix-count {
+                display: inline-block;
+                background: #d4edda;
+                color: #155724;
+                padding: 5px 15px;
+                border-radius: 20px;
+                font-weight: 600;
+            }
+            .fix-success-popup.fade-out {
+                animation: fixPopupOut 0.3s ease forwards;
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        popup.classList.add('fade-out');
+        setTimeout(() => popup.remove(), 300);
+    }, 3000);
 }
 
 // ================================
@@ -1079,18 +1406,35 @@ async function exportLogs(format) {
 // Utility Functions
 // ================================
 function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('en-UG', { month: 'short', day: 'numeric' });
 }
 
 function formatDateTime(dateStr) {
     if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    // Use system timezone with seconds precision
+    const tz = localStorage.getItem('hie_system_timezone') || 'Africa/Kampala';
+    try {
+        return new Date(dateStr).toLocaleString('en-UG', {
+            timeZone: tz,
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+    } catch (e) {
+        return new Date(dateStr).toLocaleString('en-UG', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+    }
 }
 
 function formatTimeAgo(dateStr) {
@@ -1100,7 +1444,9 @@ function formatTimeAgo(dateStr) {
     const now = new Date();
     const seconds = Math.floor((now - date) / 1000);
     
-    if (seconds < 60) return 'Just now';
+    // Show seconds precision for recent activity
+    if (seconds < 5) return 'Just now';
+    if (seconds < 60) return `${seconds}s ago`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     return `${Math.floor(seconds / 86400)}d ago`;
